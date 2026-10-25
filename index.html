@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Transaction Load Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script>
+// Phones get a view-and-sync-only dashboard; data editing stays on desktop.
+(function () {
+    var ua = navigator.userAgent || "";
+    var mobileUa = (navigator.userAgentData && navigator.userAgentData.mobile) || /iPhone|iPod|Android.+Mobile|Windows Phone|Mobi/i.test(ua);
+    var smallTouch = window.matchMedia && window.matchMedia("(pointer: coarse) and (max-width: 767px)").matches;
+    if (mobileUa || smallTouch) document.documentElement.classList.add("phone-view");
+})();
+function isPhoneView() { return document.documentElement.classList.contains("phone-view"); }
+</script>
 <style>
 * {
     box-sizing: border-box;
@@ -1450,6 +1460,47 @@ textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break:
     .ps-pair, .ps-peer { grid-template-columns: minmax(0, 1fr); }
     .ps-name { width: 100%; }
 }
+.settings-backdrop { overflow: hidden; }
+/* Hover text only takes up layout space while shown, so it cannot widen the page. */
+.info-tip:not(:hover)::after, .info-tip:not(:hover)::before { display: none; }
+@media (max-width: 640px) { .info-tip::after { width: min(280px, calc(100vw - 32px)); } }
+/* ===== Phone view: read-only data, compact sticky app bar ===== */
+.phone-only, .filters-toggle { display: none; }
+html.phone-view .phone-only { display: block; }
+html.phone-view .desktop-only,
+html.phone-view #dataCardToggle,
+html.phone-view #dataCardBody,
+html.phone-view .shortcut-hint,
+html.phone-view #bankHolidayInput,
+html.phone-view .settings-actions,
+html.phone-view #bankHolidayStatus { display: none !important; }
+.phone-note { margin-top: 12px; padding: 10px 12px; border-radius: 11px; background: var(--accent-soft); border: 1px solid var(--border); color: var(--text); font-size: 13px; line-height: 1.5; }
+@media (max-width: 640px) {
+    .appbar { position: sticky; top: 0; z-index: 900; padding: 10px 12px 0; }
+    .appbar h1 { font-size: 16px; }
+    .brand { flex: 1 1 0; }
+    .brand-mark { width: 34px; height: 34px; flex-basis: 34px; font-size: 17px; border-radius: 10px; }
+    .appbar-row { flex-wrap: wrap; gap: 10px; }
+    .appbar-actions, .global-controls { width: auto; }
+    .appbar-actions { flex: 0 0 auto; gap: 8px; }
+    body:not(.no-data) .filters-toggle { display: inline-flex; align-items: center; font-size: 13px; font-weight: 700; }
+    .appbar .global-controls { display: none; }
+    .appbar.filters-open .appbar-actions { width: 100%; }
+    .appbar.filters-open .global-controls { display: flex; order: 3; width: 100%; padding-bottom: 4px; }
+    .appbar .settings-trigger { width: 40px; height: 40px; }
+    .global-controls .gc { flex: 1 1 100%; }
+    .date-stepper input[type="date"] { flex: 1; min-width: 0; }
+    .gc-toggle { flex: 1 1 100%; }
+    .section-nav { margin-top: 8px; padding-bottom: 8px; }
+    .dash-section { scroll-margin-top: 120px; margin-bottom: 26px; }
+    .section-head h2 { font-size: 20px; }
+    .card { padding: 16px; border-radius: 14px; }
+    .an-toolbar { align-items: stretch; }
+    .an-toolbar-actions { width: 100%; }
+    .an-toolbar-actions .gc { flex: 1; }
+    .an-number { width: 100%; }
+    .verdict-list div { font-size: 12.5px; }
+}
 </style>
 </head>
 <body class="no-data">
@@ -1480,6 +1531,7 @@ textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break:
             <div class="settings-section-title">Bank Holidays</div>
             <div class="settings-help">One date per line in DD-MM-YYYY format. Saved holidays are used as low-load days in prediction and backtesting.</div>
             <textarea id="bankHolidayInput" class="holiday-textarea" placeholder="26-01-2026&#10;04-03-2026&#10;21-03-2026"></textarea>
+            <div class="phone-only phone-note">Bank holidays can be edited on a laptop.</div>
             <div class="buttons settings-actions">
                 <button type="button" class="primary" onclick="saveBankHolidays()">Save / Overwrite</button>
                 <button type="button" class="danger" onclick="clearBankHolidays()">Clear Holidays</button>
@@ -1500,7 +1552,7 @@ textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break:
                 </div>
             </div>
             <div class="appbar-actions">
-                <div class="global-controls needs-data">
+                <div class="global-controls needs-data" id="anGlobalControls">
                     <label class="gc">Metric
                         <select id="anMetric" class="an-select"></select>
                     </label>
@@ -1522,6 +1574,7 @@ textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break:
                     </label>
                     <label class="gc-toggle" title="Tick when the as-of day is still in progress, so every month is compared on completed days only"><input type="checkbox" id="anExcludeAsOf"> Exclude as-of day</label>
                 </div>
+                <button type="button" class="step-btn filters-toggle needs-data" id="anFiltersToggle" aria-expanded="false" aria-controls="anGlobalControls">Filters</button>
                 <button type="button" class="settings-trigger" id="settingsTrigger" aria-label="Open settings" title="Settings &amp; themes" onclick="openSettings()">⚙</button>
             </div>
         </div>
@@ -1550,6 +1603,7 @@ textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break:
                 <svg class="toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
             </button>
         </div>
+        <div class="phone-only phone-note">Phone view is read-only. Data is edited on a laptop. Use <b>Peer Sync</b> below to receive the latest data.</div>
         <div class="collapsible open" id="dataCardBody"><div class="collapsible-inner">
         <p>Format: <b>Date &nbsp; Success Count &nbsp; Success Amount &nbsp; Failed Count &nbsp; Failed Amount</b></p>
         <textarea id="dataInput" placeholder="2026-09-03	250	3450000	12	98000&#10;2026-09-02	231	3120500	9	64000&#10;2026-09-01	198	2870000	15	120500"></textarea>
@@ -1652,7 +1706,8 @@ textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break:
 
     <div class="card empty-hint">
         <h3>Load data to unlock the analysis</h3>
-        <p>Paste daily rows into <b>Transaction Data</b> above and press <b>Generate Chart</b>. The dashboard then builds month-to-date comparisons, same-day comparisons, trends, forecast and data health automatically.</p>
+        <p class="desktop-only">Paste daily rows into <b>Transaction Data</b> above and press <b>Generate Chart</b>. The dashboard then builds month-to-date comparisons, same-day comparisons, trends, forecast and data health automatically.</p>
+        <p class="phone-only">Turn on <b>Peer Sync</b> above, choose <b>Receive data</b>, and pair with the laptop that has the data.</p>
     </div>
 
     <section class="dash-section needs-data" id="sec-forecast">
@@ -3955,6 +4010,7 @@ function bankHolidaysToText(dates) {
 }
 
 async function saveBankHolidays() {
+    if (isPhoneView()) return;
     const status = document.getElementById("bankHolidayStatus");
     try {
         const dates = parseBankHolidayText(document.getElementById("bankHolidayInput").value);
@@ -3992,6 +4048,7 @@ async function loadBankHolidays() {
 }
 
 async function clearBankHolidays() {
+    if (isPhoneView()) return;
     const db = await openDashboardDb();
     await new Promise((resolve, reject) => {
         const tx = db.transaction(DASHBOARD_STORE, "readwrite");
@@ -4049,6 +4106,7 @@ async function loadDashboardData() {
 }
 
 async function deleteStoredData() {
+    if (isPhoneView()) return;
     if (!confirm("Delete the saved dashboard data from this browser? This cannot be undone.")) return;
     const db = await openDashboardDb();
     await new Promise((resolve, reject) => {
@@ -4909,7 +4967,11 @@ function anRenderDailyChart(model, p) {
     ];
     if (reg) datasets.push({ label: "Linear trend", data: dates.map((_, i) => reg.intercept + reg.slope * i), borderColor: p.neutral, backgroundColor: p.neutral, borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0 });
     const options = anOptions(p);
-    options.scales.x.ticks.maxTicksLimit = 12;
+    options.scales.x.ticks.maxTicksLimit = window.innerWidth < 640 ? 5 : 12;
+    options.scales.x.ticks.callback = function (value) {
+        const iso = this.getLabelForValue(value);
+        return `${Number(iso.slice(8))} ${AN_MONTHS[Number(iso.slice(5, 7)) - 1]}`;
+    };
     options.plugins.tooltip.callbacks = {
         title: items => `${items[0].label} · ${anWeekday(items[0].label)}`,
         label: ctx => `${ctx.dataset.label}: ${anFmt(ctx.raw, key, true)}`
@@ -5135,6 +5197,10 @@ function anStepAsOf(days) {
 }
 
 function anInitControls() {
+    document.getElementById("anFiltersToggle").addEventListener("click", e => {
+        const open = document.getElementById("appbar").classList.toggle("filters-open");
+        e.currentTarget.setAttribute("aria-expanded", open ? "true" : "false");
+    });
     const metric = document.getElementById("anMetric");
     metric.innerHTML = Object.entries(ANALYTICS_METRICS).map(([k, d]) => `<option value="${k}">${d.label}</option>`).join("");
     metric.value = analyticsState.metric;
@@ -5311,7 +5377,7 @@ let ps = null; // live session; null whenever nothing is running
 
 function psLoad() {
     try { Object.assign(psState, JSON.parse(localStorage.getItem(PS_STORAGE_KEY) || "{}")); } catch (_) {}
-    if (!PS_MODE_LABEL[psState.mode]) psState.mode = "";
+    if (!PS_MODE_LABEL[psState.mode]) psState.mode = isPhoneView() ? "receive" : "";
 }
 function psSave() {
     try { localStorage.setItem(PS_STORAGE_KEY, JSON.stringify(psState)); } catch (_) {}
@@ -5891,7 +5957,7 @@ function psResultText(result) {
     } else {
         parts.push("Already up to date: no missing dates.");
     }
-    if (result.conflicts) parts.push(`${result.conflicts} date${result.conflicts === 1 ? "" : "s"} differ on the two devices; this device's records were kept.`);
+    if (result.conflicts) parts.push(`${result.conflicts} date${result.conflicts === 1 ? " differs" : "s differ"} between the two devices; this device's records were kept.`);
     if (result.skipped) parts.push(`${result.skipped} duplicate row${result.skipped === 1 ? "" : "s"} ignored.`);
     if (result.saveWarning) parts.push(`Merged, but saving reported: ${result.saveWarning}. Press Generate Chart to retry saving.`);
     return parts.join(" ");
@@ -6045,6 +6111,7 @@ function psSetEnabled(on) {
 }
 
 function psInit() {
+    if (isPhoneView()) ["dataInput", "instantDataInput", "classicDataInput", "bankHolidayInput"].forEach(id => { psEl(id).readOnly = true; });
     psLoad();
     psEl("psName").value = psState.name;
     psEl("psName").placeholder = psDefaultName();

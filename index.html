@@ -1386,6 +1386,8 @@ body.no-data .empty-hint { display: block; }
 .hm-key.we { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--text) 22%, transparent); }
 .hm-key.asof { outline: 2px solid var(--text); outline-offset: 1px; }
 .hm-key.cmp { background: var(--accent); }
+.hm-reset { margin-left: auto; padding: 7px 14px; font-size: 13px; }
+.hm-reset:disabled { opacity: .45; cursor: not-allowed; }
 .an-tip { position: fixed; z-index: 1400; left: 0; top: 0; pointer-events: none; padding: 10px 12px; border-radius: 10px; background: var(--tooltip-bg); color: #f8fafc; font-size: 12.5px; line-height: 1.55; box-shadow: 0 14px 34px rgba(0,0,0,.28); opacity: 0; transform: translateY(4px); transition: opacity .12s ease, transform .12s ease; max-width: 290px; }
 .an-tip.show { opacity: 1; transform: none; }
 .tip-hint { margin-top: 6px; font-size: 11px; color: #cbd5e1; }
@@ -1441,17 +1443,18 @@ html[data-theme="glass"] .an-table-wrap { border-radius: 16px; }
 @keyframes psPulse { 50% { opacity: .35; } }
 .ps-help { color: var(--text-soft); font-size: 13px; line-height: 1.5; margin-top: 10px; }
 .buttons .ps-help { margin: 0; align-self: center; }
-.ps-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+.ps-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 14px; max-width: 560px; }
 .ps-step { padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-muted); min-width: 0; }
 .ps-step h4 { margin: 0 0 4px; color: var(--text); }
 .ps-step p { margin: 0 0 4px; color: var(--text-soft); font-size: 13px; }
 .ps-label { display: block; margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--text-soft); }
-textarea.ps-code { height: 78px; margin-top: 8px; font-size: 11.5px; word-break: break-all; resize: vertical; }
+.ps-code-big { display: inline-block; margin: 10px 0 2px; padding: 12px 22px; border-radius: 14px; border: 2px dashed var(--accent); background: var(--surface-solid); color: var(--text); font: 800 40px/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .32em; text-indent: .32em; user-select: all; }
+.ps-code-entry { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.ps-code-input { width: 150px; text-align: center; text-transform: uppercase; font: 800 24px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .3em; }
 .ps-session { margin-top: 14px; }
 .ps-peer { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .ps-peer > div { padding: 10px 12px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-muted); font-size: 13px; color: var(--text); min-width: 0; overflow-wrap: anywhere; }
 .ps-k { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); margin-bottom: 3px; }
-.ps-verify { font-size: 17px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
 .ps-progress { margin-top: 14px; height: 6px; border-radius: 99px; background: var(--surface-muted); overflow: hidden; }
 .ps-bar { width: 0; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--blue)); transition: width .25s ease; }
 .ps-progress-text { min-height: 20px; margin-top: 8px; font-size: 13px; color: var(--text); }
@@ -1657,29 +1660,19 @@ html.phone-view #bankHolidayStatus { display: none !important; }
                 <div class="ps-help" id="psModeHelp"></div>
 
                 <div class="ps-pair" id="psPair">
-                    <div class="ps-step">
-                        <h4>Start pairing</h4>
-                        <p>Use on one device. You will share a code and paste back the reply.</p>
-                        <div class="buttons"><button type="button" class="primary" id="psStart">Create pairing code</button><button type="button" class="secondary" id="psCancel" hidden>Cancel</button></div>
-                        <div id="psOfferOutWrap" hidden>
-                            <textarea id="psOfferOut" class="ps-code" readonly aria-label="Pairing code to share"></textarea>
-                            <div class="buttons"><button type="button" class="secondary" id="psCopyOffer">Copy pairing code</button></div>
-                        </div>
-                        <div id="psReplyStep" hidden>
-                            <label class="ps-label" for="psAnswerIn">Paste the reply code from the other device</label>
-                            <textarea id="psAnswerIn" class="ps-code" spellcheck="false"></textarea>
-                            <div class="buttons"><button type="button" class="primary" id="psConnect">Connect</button></div>
-                        </div>
+                    <div class="ps-step" id="psSendStep">
+                        <h4>Your pairing code</h4>
+                        <p>Tell this code to the person on the receiving device. It is valid for 10 minutes.</p>
+                        <div class="ps-code-big" id="psCodeOut" aria-live="polite">····</div>
+                        <div class="buttons"><button type="button" class="secondary" id="psNewCode">New code</button></div>
                     </div>
-                    <div class="ps-step">
-                        <h4>Join with a code</h4>
-                        <p>Use on the other device after receiving its pairing code.</p>
-                        <label class="ps-label" for="psOfferIn">Paste the pairing code</label>
-                        <textarea id="psOfferIn" class="ps-code" spellcheck="false"></textarea>
-                        <div class="buttons"><button type="button" class="primary" id="psJoin">Create reply code</button></div>
-                        <div id="psAnswerOutWrap" hidden>
-                            <textarea id="psAnswerOut" class="ps-code" readonly aria-label="Reply code to send back"></textarea>
-                            <div class="buttons"><button type="button" class="secondary" id="psCopyAnswer">Copy reply code</button></div>
+                    <div class="ps-step" id="psReceiveStep">
+                        <h4>Enter the sender's code</h4>
+                        <p>Type the code shown on the sending device. It connects as soon as the code is complete.</p>
+                        <div class="ps-code-entry">
+                            <input type="text" id="psCodeIn" class="an-select ps-code-input" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Sender's pairing code">
+                            <button type="button" class="primary" id="psConnect">Connect</button>
+                            <button type="button" class="secondary" id="psCancel" hidden>Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -1689,7 +1682,7 @@ html.phone-view #bankHolidayStatus { display: none !important; }
                         <div><span class="ps-k">This device</span><b id="psThisMode"></b></div>
                         <div><span class="ps-k">Connected to</span><b id="psPeerName"></b> · <span id="psPeerMode"></span></div>
                         <div><span class="ps-k">Link</span><b>Direct · same network · encrypted</b></div>
-                        <div title="Both devices should show the same number. If they differ, disconnect."><span class="ps-k">Verify code</span><b id="psVerify" class="ps-verify"></b></div>
+                        <div><span class="ps-k">Security</span><b>Code verified on both devices</b></div>
                     </div>
                     <div class="buttons">
                         <button type="button" class="primary" id="psSyncNow">Sync Now</button>
@@ -1894,6 +1887,7 @@ html.phone-view #bankHolidayStatus { display: none !important; }
                 <span><i class="hm-key we"></i> Weekend</span>
                 <span><i class="hm-key asof"></i> As-of date</span>
                 <span><i class="hm-key cmp"></i> Same-day compare column</span>
+                <button type="button" class="secondary hm-reset" id="anHeatmapReset" title="Back to the latest date and default same-day column">Reset selection</button>
             </div>
         </div>
     </section>
@@ -4869,7 +4863,7 @@ function anRenderPaceChart(model, p) {
     const key = analyticsState.metric, vis = anVisible(model);
     const datasets = vis.map((x, i) => {
         const age = vis.length - 1 - i;
-        const color = x.isCurrent ? p.accent : age === 1 ? p.blue : anAlpha(p.neutral, Math.max(0.22, 0.6 - age * 0.04));
+        const color = x.isCurrent ? "#ff6b00" : age === 1 ? p.blue : anAlpha(p.neutral, Math.max(0.22, 0.6 - age * 0.04));
         return { label: x.label, data: anCumulative(x, key), borderColor: color, backgroundColor: color, borderWidth: x.isCurrent ? 3.2 : age === 1 ? 2.2 : 1.4, pointRadius: 0, pointHoverRadius: 4, tension: 0.25, spanGaps: true, order: x.isCurrent ? 0 : age };
     });
     if (analyticsState.showAvgPace) {
@@ -5147,6 +5141,7 @@ function anSyncControls(model) {
     document.querySelectorAll(".an-cut-day").forEach(el => { el.textContent = model.cutoffDay; });
     document.getElementById("anAsOfNext").disabled = model.asOf >= model.last;
     document.getElementById("anAsOfPrev").disabled = model.asOf <= model.first;
+    document.getElementById("anHeatmapReset").disabled = !analyticsState.asOf && !analyticsState.compareDay;
     const def = anMetric();
     document.getElementById("anSummaryCaption").innerHTML = `${def.label} as of <b>${model.asOf} (${anWeekday(model.asOf)})</b> · every month compared on day 1–${model.cutoffDay}${analyticsState.excludeAsOf ? " (as-of day excluded)" : ""}`;
     document.getElementById("appbarStatus").textContent = `${currentRows.length} days · ${model.first} → ${model.last}`;
@@ -5180,6 +5175,18 @@ function renderAnalytics(quiet = false) {
     ];
     steps.forEach(step => { try { step(); } catch (error) { console.error("Analytics render failed:", error); } });
     analyticsQuiet = false;
+    if (!anForecastShown) {
+        anForecastShown = true;
+        setTimeout(anShowForecast, 500); // after the data card's collapse animation settles
+    }
+}
+
+// Forecast is the default tab: the first time data is shown, open the page on it.
+let anForecastShown = false;
+function anShowForecast() {
+    if (window.scrollY > 50) return;
+    document.getElementById("sec-forecast").scrollIntoView({ behavior: "instant", block: "start" });
+    document.querySelectorAll(".section-nav a").forEach(link => link.classList.toggle("active", link.getAttribute("href") === "#sec-forecast"));
 }
 
 function anUpdate(patch) {
@@ -5238,6 +5245,10 @@ function anInitControls() {
         anTipHide();
         anUpdate({ asOf: cell.dataset.iso, compareDay: 0 });
         showToast(`Analysing as of ${cell.dataset.iso}`);
+    });
+    document.getElementById("anHeatmapReset").addEventListener("click", () => {
+        anUpdate({ asOf: "", compareDay: 0 });
+        showToast("Selection reset to the latest date");
     });
     document.addEventListener("keydown", e => {
         if (!e.altKey || e.target.matches("input, textarea, select")) return;
@@ -5346,13 +5357,15 @@ anInitControls();
 </script>
 
 <script>
-/* ===== Peer Sync: LAN-only WebRTC DataChannel transfer with manual pairing ===== */
+/* ===== Peer Sync: LAN-only WebRTC DataChannel transfer, paired with a short code ===== */
 const PS_STORAGE_KEY = "transaction-dashboard-peer-sync";
 const PS_CONFIG = {
-    CODE_PREFIX: "WLS1",
-    PROTOCOL_VERSION: 1,
-    MAX_CODE_LENGTH: 20000,
-    GATHER_TIMEOUT_MS: 4000,
+    PROTOCOL_VERSION: 2,
+    CODE_LENGTH: 4,
+    CODE_ALPHABET: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", // no 0/O or 1/I, so codes are easy to read out
+    MAX_AUTH_FAILURES: 3,
+    PEERJS_URL: "https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js",
+    PEERJS_SRI: "sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR",
     PAIRING_TIMEOUT_MS: 10 * 60 * 1000,
     CONNECT_TIMEOUT_MS: 25 * 1000,
     HELLO_TIMEOUT_MS: 10 * 1000,
@@ -5366,6 +5379,8 @@ const PS_CONFIG = {
     BUFFER_HIGH: 1024 * 1024,
     BUFFER_LOW: 256 * 1024
 };
+// No STUN/TURN servers: only local-network addresses can ever be used, and nothing is relayed.
+const PS_PEER_OPTIONS = { debug: 0, config: { iceServers: [] } };
 const PS_DATASETS = {
     main: { input: "dataInput", fields: 5, label: "transaction" },
     instant: { input: "instantDataInput", fields: 3, label: "instant" },
@@ -5374,6 +5389,7 @@ const PS_DATASETS = {
 const PS_MODE_LABEL = { send: "Send data", receive: "Receive data" };
 const psState = { enabled: false, mode: "", name: "", lastSync: null };
 let ps = null; // live session; null whenever nothing is running
+let psPeerLibrary = null;
 
 function psLoad() {
     try { Object.assign(psState, JSON.parse(localStorage.getItem(PS_STORAGE_KEY) || "{}")); } catch (_) {}
@@ -5443,49 +5459,64 @@ async function psSha256(text) {
     return psSha256Js(bytes);
 }
 
-/* ---------- pairing codes ---------- */
-function psB64urlEncode(bytes) {
-    let bin = "";
-    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+/* ---------- short pairing codes ---------- */
+function psNewCode() {
+    const alphabet = PS_CONFIG.CODE_ALPHABET, bytes = new Uint8Array(PS_CONFIG.CODE_LENGTH);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, b => alphabet[b % alphabet.length]).join("");
 }
-function psB64urlDecode(text) {
-    const b64 = text.replace(/-/g, "+").replace(/_/g, "/");
-    const bin = atob(b64 + "===".slice((b64.length + 3) % 4));
-    return Uint8Array.from(bin, ch => ch.charCodeAt(0));
+function psNormalizeCode(text) {
+    const code = String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return code.length === PS_CONFIG.CODE_LENGTH && [...code].every(ch => PS_CONFIG.CODE_ALPHABET.includes(ch)) ? code : "";
 }
-async function psPipe(bytes, transform) {
-    return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(transform)).arrayBuffer());
-}
-async function psEncodeCode(kind, sdp) {
-    const raw = new TextEncoder().encode(JSON.stringify({ v: PS_CONFIG.PROTOCOL_VERSION, k: kind, sdp }));
-    if (typeof CompressionStream === "function") return `${PS_CONFIG.CODE_PREFIX}z.${psB64urlEncode(await psPipe(raw, new CompressionStream("deflate-raw")))}`;
-    return `${PS_CONFIG.CODE_PREFIX}p.${psB64urlEncode(raw)}`;
-}
-async function psDecodeCode(text, expectedKind) {
-    const code = String(text || "").replace(/\s+/g, "");
-    if (!code) throw new Error("Paste the code first.");
-    if (code.length > PS_CONFIG.MAX_CODE_LENGTH) throw new Error("That code is too long to be a pairing code.");
-    const match = code.match(/^WLS1([zp])\.([A-Za-z0-9_-]+)$/);
-    if (!match) throw new Error("That is not a valid pairing code. Copy the whole code and try again.");
-    let obj;
-    try {
-        let bytes = psB64urlDecode(match[2]);
-        if (match[1] === "z") {
-            if (typeof DecompressionStream !== "function") throw new Error("unsupported");
-            bytes = await psPipe(bytes, new DecompressionStream("deflate-raw"));
-        }
-        obj = JSON.parse(new TextDecoder().decode(bytes));
-    } catch (error) {
-        throw new Error(error.message === "unsupported" ? "This browser cannot read that code. Update the browser and try again." : "The code is damaged or incomplete. Copy it again.");
+// The pairing service only ever sees a hash of the code, never the code itself.
+async function psRoomId(code) { return "wlsync-" + (await psSha256("wallet-load-sync-room|" + code)).slice(0, 24); }
+
+function psHexToBytes(hex) { return Uint8Array.from(hex.match(/../g), h => parseInt(h, 16)); }
+async function psHmac(keyText, message) {
+    const enc = new TextEncoder();
+    if (window.isSecureContext && window.crypto && crypto.subtle) {
+        const key = await crypto.subtle.importKey("raw", enc.encode(keyText), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+        return Array.from(new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(message))), x => x.toString(16).padStart(2, "0")).join("");
     }
-    if (!obj || obj.v !== PS_CONFIG.PROTOCOL_VERSION || typeof obj.sdp !== "string" || obj.sdp.length > 15000) throw new Error("The other device is running a different version of this dashboard.");
-    if (obj.k !== expectedKind) {
-        throw new Error(expectedKind === "answer"
-            ? "That is a pairing code, not a reply code. Paste the reply from the other device."
-            : "That is a reply code. Paste it on the device that created the pairing code.");
+    let key = enc.encode(keyText);
+    if (key.length > 64) key = psHexToBytes(psSha256Js(key));
+    const block = new Uint8Array(64);
+    block.set(key);
+    const msg = enc.encode(message);
+    const inner = new Uint8Array(64 + msg.length);
+    for (let i = 0; i < 64; i++) inner[i] = block[i] ^ 0x36;
+    inner.set(msg, 64);
+    const outer = new Uint8Array(96);
+    for (let i = 0; i < 64; i++) outer[i] = block[i] ^ 0x5c;
+    outer.set(psHexToBytes(psSha256Js(inner)), 64);
+    return psSha256Js(outer);
+}
+
+// Proof that this device knows the code, bound to the encryption keys of this exact connection,
+// so neither a code-guesser nor the pairing service can stand in for the other device.
+async function psProof(session, mode) {
+    const fingerprint = sdp => ((String(sdp || "").match(/a=fingerprint:\S+ (\S+)/) || [])[1] || "").toUpperCase();
+    const local = session.pc.localDescription, remote = session.pc.remoteDescription;
+    const keys = [fingerprint(local && local.sdp), fingerprint(remote && remote.sdp)].sort().join("|");
+    return psHmac(session.code, `wallet-load-sync-auth|v${PS_CONFIG.PROTOCOL_VERSION}|${mode}|${keys}`);
+}
+
+// PeerJS is only downloaded once Peer Sync is actually used.
+function psLoadPeerLibrary() {
+    if (typeof Peer === "function") return Promise.resolve();
+    if (!psPeerLibrary) {
+        psPeerLibrary = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = PS_CONFIG.PEERJS_URL;
+            script.integrity = PS_CONFIG.PEERJS_SRI;
+            script.crossOrigin = "anonymous";
+            script.onload = () => resolve();
+            script.onerror = () => { psPeerLibrary = null; script.remove(); reject(new Error("Couldn't load the pairing service. Check the internet connection and try again.")); };
+            document.head.appendChild(script);
+        });
     }
-    return obj.sdp;
+    return psPeerLibrary;
 }
 
 /* ---------- same-network enforcement ---------- */
@@ -5500,16 +5531,6 @@ function psIsLocalAddress(address) {
     if (a.includes(":")) return a === "::1" || /^fe[89ab]/.test(a) || /^f[cd]/.test(a);
     return false;
 }
-
-// Keep only host candidates on private / link-local / mDNS addresses.
-function psLanOnlySdp(sdp) {
-    return sdp.split(/\r?\n/).filter(line => {
-        if (!line.startsWith("a=candidate:")) return true;
-        const parts = line.split(" ");
-        return parts[7] === "host" && psIsLocalAddress(parts[4]);
-    }).join("\r\n");
-}
-function psHasCandidates(sdp) { return /(^|\n)a=candidate:/.test(sdp); }
 
 async function psVerifyLan(pc) {
     const notLan = "This connection is not direct on the local network. Peer Sync only works between devices on the same Wi-Fi or LAN.";
@@ -5531,12 +5552,6 @@ async function psVerifyLan(pc) {
     }
 }
 
-async function psVerifyCode(localSdp, remoteSdp) {
-    const fingerprint = sdp => ((sdp.match(/a=fingerprint:\S+ (\S+)/) || [])[1] || "").toUpperCase();
-    const hex = await psSha256([fingerprint(localSdp), fingerprint(remoteSdp)].sort().join("|"));
-    return String(parseInt(hex.slice(0, 8), 16) % 1000000).padStart(6, "0").replace(/(\d{3})(\d{3})/, "$1 $2");
-}
-
 /* ---------- session lifecycle ---------- */
 function psTimer(name, fn, ms) {
     if (!ps) return;
@@ -5553,33 +5568,51 @@ function psResetIdle() {
     if (ps && ps.peer) psTimer("idle", () => psTeardown("Disconnected after 5 minutes without activity to save battery. Pair again when needed.", "idle"), PS_CONFIG.IDLE_TIMEOUT_MS);
 }
 
-function psCreatePeer(role) {
-    const pc = new RTCPeerConnection({ iceServers: [], iceTransportPolicy: "all", bundlePolicy: "max-bundle", iceCandidatePoolSize: 0 });
-    ps = { pc, dc: null, role, timers: new Map(), frames: new Map(), peer: null, pending: null, sending: false, recovery: 0, localSdp: "", remoteSdp: "", verify: "" };
-    const session = ps;
-    const onState = () => { if (ps === session) psOnConnectionState(); };
-    pc.addEventListener("iceconnectionstatechange", onState);
-    pc.addEventListener("connectionstatechange", onState);
-    return pc;
+function psNewSession(role, code) {
+    ps = { role, code, broker: null, conn: null, pc: null, dc: null, timers: new Map(), frames: new Map(), peer: null, pending: null, sending: false, recovery: 0, failures: 0 };
+    return ps;
 }
 
-async function psGatherComplete(pc) {
-    if (pc.iceGatheringState === "complete") return;
-    await new Promise(resolve => {
-        const done = () => { clearTimeout(timer); pc.removeEventListener("icegatheringstatechange", check); resolve(); };
-        const check = () => { if (pc.iceGatheringState === "complete") done(); };
-        const timer = setTimeout(done, PS_CONFIG.GATHER_TIMEOUT_MS);
-        pc.addEventListener("icegatheringstatechange", check);
+function psAttachConnection(conn) {
+    const session = ps;
+    session.conn = conn;
+    conn.on("open", () => {
+        if (ps !== session || session.conn !== conn) { conn.close(); return; }
+        session.pc = conn.peerConnection;
+        session.dc = conn.dataChannel;
+        session.dc.bufferedAmountLowThreshold = PS_CONFIG.BUFFER_LOW;
+        const onState = () => { if (ps === session && session.pc === conn.peerConnection) psOnConnectionState(); };
+        session.pc.addEventListener("iceconnectionstatechange", onState);
+        session.pc.addEventListener("connectionstatechange", onState);
+        psOnOpen();
+    });
+    conn.on("data", data => { if (ps === session && session.conn === conn && typeof data === "string") psOnMessage(data); });
+    conn.on("close", () => {
+        if (ps !== session || session.conn !== conn) return;
+        if (session.peer) return psTeardown("The other device disconnected.");
+        if (session.role === "send") return psResumeWaiting();
+        psTeardown("Connection closed before pairing finished.");
     });
 }
 
-function psAttachChannel(dc) {
+// Sender drops a receiver that failed to pair and keeps its code open for the next attempt.
+function psResumeWaiting(reason) {
     const session = ps;
-    session.dc = dc;
-    dc.bufferedAmountLowThreshold = PS_CONFIG.BUFFER_LOW;
-    dc.onopen = () => { if (ps === session) psOnOpen(); };
-    dc.onclose = () => { if (ps === session) psTeardown(session.peer ? "The other device disconnected." : "Connection closed before pairing finished."); };
-    dc.onmessage = event => { if (ps === session) psOnMessage(event.data); };
+    const conn = session.conn;
+    session.conn = session.pc = session.dc = null;
+    session.frames.clear();
+    psClearTimer("hello");
+    try { if (conn) conn.close(); } catch (_) {}
+    psSetStatus(`${reason ? reason + " " : ""}Waiting for the receiver to enter ${session.code}.`, reason ? "warn" : "wait");
+    psRender();
+}
+
+// A failed check gives the sender's code a few more tries before it is replaced.
+function psReject(reason) {
+    const session = ps;
+    if (session.role !== "send") return psTeardown(reason, "err");
+    if (++session.failures < PS_CONFIG.MAX_AUTH_FAILURES) return psResumeWaiting(reason);
+    psStartSender(`${reason} A new code was created for safety.`);
 }
 
 function psTeardown(message, tone = "warn") {
@@ -5590,11 +5623,10 @@ function psTeardown(message, tone = "warn") {
         session.timers.clear();
         session.frames.clear();
         try { if (session.dc && session.dc.readyState === "open") session.dc.send(JSON.stringify({ t: "bye" })); } catch (_) {}
-        try { if (session.dc) session.dc.close(); } catch (_) {}
-        try { session.pc.close(); } catch (_) {}
+        try { if (session.conn) session.conn.close(); } catch (_) {}
+        try { if (session.broker) session.broker.destroy(); } catch (_) {}
         if (session.pending || session.sending) psProgress(0, "Transfer stopped. Nothing partial was saved.");
     }
-    ["psOfferOut", "psAnswerOut"].forEach(id => { psEl(id).value = ""; });
     psSetStatus(message || (psState.enabled ? "Not connected" : "Off"), message ? tone : "idle");
     psRender();
 }
@@ -5647,105 +5679,101 @@ function psAbortTransfer(message) {
     psRender();
 }
 
-/* ---------- pairing actions ---------- */
-function psReadyToPair() {
+/* ---------- pairing ---------- */
+function psReady() {
     if (!psState.enabled) return false;
-    if (!psState.mode) { psSetStatus("Choose Send data or Receive data first.", "warn"); return false; }
     if (typeof RTCPeerConnection !== "function") { psSetStatus("This browser does not support peer connections.", "err"); return false; }
     return true;
 }
 
-async function psStartPairing() {
-    if (!psReadyToPair()) return;
-    psTeardown(null);
-    try {
-        psSetStatus("Creating pairing code…", "wait");
-        const pc = psCreatePeer("offer");
-        psAttachChannel(pc.createDataChannel("wallet-load-sync", { ordered: true }));
-        await pc.setLocalDescription(await pc.createOffer());
-        await psGatherComplete(pc);
-        if (!ps || ps.pc !== pc) return;
-        const sdp = psLanOnlySdp(pc.localDescription.sdp);
-        if (!psHasCandidates(sdp)) throw new Error("No local network address found. Connect this device to Wi-Fi or LAN and try again.");
-        ps.localSdp = sdp;
-        psEl("psOfferOut").value = await psEncodeCode("offer", sdp);
-        psTimer("pairing", () => psTeardown("Pairing code expired. Create a new one.", "idle"), PS_CONFIG.PAIRING_TIMEOUT_MS);
-        psSetStatus("Step 2: send this code to the other device, then paste its reply below.", "wait");
-        psRender();
-    } catch (error) { psFail(error); }
+function psOnBrokerError(session, error) {
+    if (ps !== session || session.peer) return; // once paired, the pairing service is no longer needed
+    const type = error && error.type;
+    if (type === "unavailable-id" && session.role === "send") return psStartSender(); // code already taken elsewhere; pick another
+    const offline = "Couldn't reach the pairing service. Check the internet connection and try again.";
+    const messages = {
+        "peer-unavailable": `No sending device is waiting with code ${session.code}. Check the code, and that the sender has Peer Sync on with Send data selected.`,
+        network: offline, "server-error": offline, "socket-error": offline, "socket-closed": offline,
+        "browser-incompatible": "This browser does not support peer connections.",
+        webrtc: "Could not connect. Both devices must be on the same Wi-Fi or LAN."
+    };
+    psTeardown(messages[type] || "Pairing failed. Try again.", "err");
 }
 
-async function psConnectWithReply() {
-    if (!ps || ps.role !== "offer" || ps.pc.signalingState !== "have-local-offer") { psSetStatus("Create a pairing code first.", "warn"); return; }
-    let sdp;
+async function psStartSender(notice = "") {
+    if (!psReady() || psState.mode !== "send") return;
+    psTeardown(null);
+    const session = psNewSession("send", psNewCode());
+    psSetStatus("Getting a code ready…", "wait");
+    psRender();
     try {
-        sdp = psLanOnlySdp(await psDecodeCode(psEl("psAnswerIn").value, "answer"));
-        if (!psHasCandidates(sdp)) throw new Error("The other device shared no local network address. Both devices must be on the same Wi-Fi or LAN.");
-    } catch (error) { psSetStatus(error.message, "err"); return; }
-    try {
-        ps.remoteSdp = sdp;
-        await ps.pc.setRemoteDescription({ type: "answer", sdp });
-        psClearTimer("pairing");
-        psTimer("connect", () => psTeardown("Could not connect. Both devices must be on the same Wi-Fi or LAN (guest networks often block device-to-device traffic).", "err"), PS_CONFIG.CONNECT_TIMEOUT_MS);
-        psSetStatus("Connecting over the local network…", "wait");
-        psRender();
-    } catch (error) { psFail(error); }
+        await psLoadPeerLibrary();
+        const id = await psRoomId(session.code);
+        if (ps !== session) return;
+        const broker = new Peer(id, PS_PEER_OPTIONS);
+        session.broker = broker;
+        broker.on("open", () => {
+            if (ps !== session) return;
+            psSetStatus(`${notice ? notice + " " : ""}Waiting for the receiver to enter ${session.code}.`, notice ? "warn" : "wait");
+            psRender();
+        });
+        broker.on("connection", conn => {
+            if (ps !== session || session.conn) { conn.close(); return; } // one receiver at a time
+            psAttachConnection(conn);
+            psTimer("hello", () => psReject("The receiving device did not finish connecting."), PS_CONFIG.CONNECT_TIMEOUT_MS);
+        });
+        broker.on("error", error => psOnBrokerError(session, error));
+        psTimer("pairing", () => psTeardown("Code expired. Press New code to get another.", "idle"), PS_CONFIG.PAIRING_TIMEOUT_MS);
+    } catch (error) { if (ps === session) psFail(error); }
 }
 
-async function psJoin() {
-    if (!psReadyToPair()) return;
-    let remote;
+async function psStartReceiver() {
+    if (!psReady() || psState.mode !== "receive" || ps) return;
+    const code = psNormalizeCode(psEl("psCodeIn").value);
+    if (!code) { psSetStatus(`Enter the ${PS_CONFIG.CODE_LENGTH}-character code shown on the sending device.`, "warn"); return; }
+    const session = psNewSession("receive", code);
+    psSetStatus("Connecting…", "wait");
+    psRender();
+    psTimer("connect", () => psTeardown("Could not connect. Check the code, and that both devices are on the same Wi-Fi or LAN (guest networks often block device-to-device traffic).", "err"), PS_CONFIG.CONNECT_TIMEOUT_MS);
     try {
-        remote = psLanOnlySdp(await psDecodeCode(psEl("psOfferIn").value, "offer"));
-        if (!psHasCandidates(remote)) throw new Error("The other device shared no local network address. Both devices must be on the same Wi-Fi or LAN.");
-    } catch (error) { psSetStatus(error.message, "err"); return; }
-    psTeardown(null);
-    try {
-        psSetStatus("Creating reply code…", "wait");
-        const pc = psCreatePeer("answer");
-        pc.addEventListener("datachannel", event => { if (ps && ps.pc === pc && !ps.dc) psAttachChannel(event.channel); });
-        ps.remoteSdp = remote;
-        await pc.setRemoteDescription({ type: "offer", sdp: remote });
-        await pc.setLocalDescription(await pc.createAnswer());
-        await psGatherComplete(pc);
-        if (!ps || ps.pc !== pc) return;
-        const sdp = psLanOnlySdp(pc.localDescription.sdp);
-        if (!psHasCandidates(sdp)) throw new Error("No local network address found. Connect this device to Wi-Fi or LAN and try again.");
-        ps.localSdp = sdp;
-        psEl("psAnswerOut").value = await psEncodeCode("answer", sdp);
-        psTimer("pairing", () => psTeardown("The first device did not connect in time. Pair again.", "idle"), PS_CONFIG.PAIRING_TIMEOUT_MS);
-        psSetStatus("Step 3: send this reply code back to the first device and press Connect there.", "wait");
-        psRender();
-    } catch (error) { psFail(error); }
+        await psLoadPeerLibrary();
+        const id = await psRoomId(code);
+        if (ps !== session) return;
+        const broker = new Peer(PS_PEER_OPTIONS);
+        session.broker = broker;
+        broker.on("open", () => { if (ps === session) psAttachConnection(broker.connect(id, { reliable: true, serialization: "raw" })); });
+        broker.on("error", error => psOnBrokerError(session, error));
+    } catch (error) { if (ps === session) psFail(error); }
 }
 
 async function psOnOpen() {
-    psClearTimer("pairing");
     psClearTimer("connect");
     const session = ps;
-    const verify = await psVerifyCode(session.localSdp, session.remoteSdp);
-    if (ps !== session) return;
-    session.verify = verify;
-    psSendRaw({ t: "hello", v: PS_CONFIG.PROTOCOL_VERSION, mode: psState.mode, name: (psState.name || psDefaultName()).slice(0, 32) });
-    psSetStatus("Checking the connection…", "wait");
-    psTimer("hello", () => psTeardown("The other device did not respond.", "err"), PS_CONFIG.HELLO_TIMEOUT_MS);
+    const proof = await psProof(session, psState.mode);
+    if (ps !== session || !session.dc) return;
+    psSendRaw({ t: "hello", v: PS_CONFIG.PROTOCOL_VERSION, mode: psState.mode, name: (psState.name || psDefaultName()).slice(0, 32), proof });
+    psSetStatus("Checking the code…", "wait");
+    psTimer("hello", () => psReject("The other device did not respond."), PS_CONFIG.HELLO_TIMEOUT_MS);
 }
 
 async function psOnHello(msg) {
     if (ps.peer) return;
-    psClearTimer("hello");
-    if (msg.v !== PS_CONFIG.PROTOCOL_VERSION || !PS_MODE_LABEL[msg.mode]) return psTeardown("The other device is running a different version of this dashboard.", "err");
-    if (msg.mode === psState.mode) {
-        return psTeardown(`Both devices are set to “${PS_MODE_LABEL[msg.mode]}”. Set one to Send and the other to Receive, then pair again.`, "err");
-    }
     const session = ps;
+    if (msg.v !== PS_CONFIG.PROTOCOL_VERSION || !PS_MODE_LABEL[msg.mode] || typeof msg.proof !== "string") return psReject("The other device is running a different version of this dashboard. Reload both pages.");
+    if (msg.mode === psState.mode) return psReject(`Both devices are set to “${PS_MODE_LABEL[msg.mode]}”. Set one to Send and the other to Receive.`);
+    const expected = await psProof(session, msg.mode);
+    if (ps !== session) return;
+    if (msg.proof !== expected) return psReject("The code did not match.");
     const lan = await psVerifyLan(session.pc);
     if (ps !== session) return;
-    if (!lan.ok) return psTeardown(lan.reason, "err");
+    if (!lan.ok) return psReject(lan.reason);
+    psClearTimer("hello");
+    psClearTimer("pairing");
     session.peer = { mode: msg.mode, name: typeof msg.name === "string" && msg.name.trim() ? msg.name.trim().slice(0, 32) : "Other device" };
-    ["psOfferIn", "psAnswerIn"].forEach(id => { psEl(id).value = ""; });
+    try { session.broker.disconnect(); } catch (_) {} // paired: stop talking to the pairing service
+    psEl("psCodeIn").value = "";
     psResetIdle();
-    psSetStatus("Connected · direct on the same network", "ok");
+    psSetStatus("Connected · code verified · direct on the same network", "ok");
     psProgress(0, psState.mode === "receive" ? "Press Sync Now to fetch only the dates this device is missing." : "Waiting for the receiving device to press Sync Now.");
     psRender();
 }
@@ -6041,7 +6069,7 @@ function psRender() {
         const active = btn.dataset.mode === psState.mode;
         btn.classList.toggle("active", active);
         btn.setAttribute("aria-checked", active ? "true" : "false");
-        btn.disabled = !!ps;
+        btn.disabled = connected;
     });
     psEl("psName").disabled = !!ps;
     psEl("psModeHelp").textContent = psState.mode === "send"
@@ -6049,19 +6077,19 @@ function psRender() {
         : psState.mode === "receive"
             ? "This device only receives. It adds dates it is missing; records it already has are never changed."
             : "Choose a direction. One device must be set to Send and the other to Receive.";
-    psEl("psPair").hidden = connected;
+    psEl("psPair").hidden = connected || !psState.mode;
+    psEl("psSendStep").hidden = psState.mode !== "send";
+    psEl("psReceiveStep").hidden = psState.mode !== "receive";
+    psEl("psCodeOut").textContent = ps && ps.role === "send" && ps.broker && ps.broker.open ? ps.code : "····";
+    const connecting = !!(ps && ps.role === "receive" && !connected);
+    psEl("psCodeIn").disabled = connecting;
+    psEl("psConnect").disabled = connecting;
+    psEl("psConnect").textContent = connecting ? "Connecting…" : "Connect";
+    psEl("psCancel").hidden = !connecting;
     psEl("psSession").hidden = !connected;
-    const hasOffer = !!psEl("psOfferOut").value, hasAnswer = !!psEl("psAnswerOut").value;
-    psEl("psOfferOutWrap").hidden = !hasOffer;
-    psEl("psAnswerOutWrap").hidden = !hasAnswer;
-    psEl("psReplyStep").hidden = !(ps && ps.role === "offer" && hasOffer);
-    psEl("psStart").disabled = !psState.mode;
-    psEl("psJoin").disabled = !psState.mode;
-    psEl("psCancel").hidden = !ps || connected;
     if (connected) {
         psEl("psPeerName").textContent = ps.peer.name;
         psEl("psPeerMode").textContent = PS_MODE_LABEL[ps.peer.mode];
-        psEl("psVerify").textContent = ps.verify;
         psEl("psThisMode").textContent = PS_MODE_LABEL[psState.mode];
     }
     const sync = psEl("psSyncNow");
@@ -6073,17 +6101,6 @@ function psRender() {
     psEl("psLastSync").textContent = last && last.at
         ? `${new Date(last.at).toLocaleString()} · ${last.direction === "send" ? "sent to" : "received from"} ${last.peer} · ${last.summary}`
         : "Never";
-}
-
-async function psCopy(id) {
-    const value = psEl(id).value;
-    try {
-        await navigator.clipboard.writeText(value);
-        showToast("Code copied");
-    } catch (_) {
-        psEl(id).select();
-        showToast("Select-all done: press Ctrl+C to copy", "error");
-    }
 }
 
 function psOnOffline() {
@@ -6108,6 +6125,7 @@ function psSetEnabled(on) {
     window[method]("pagehide", psOnPageHide);
     psTeardown(null); // turning on or off always starts from a clean, idle state
     psProgress(0, "");
+    if (on && psState.mode === "send") psStartSender();
 }
 
 function psInit() {
@@ -6118,18 +6136,25 @@ function psInit() {
     psEl("psEnabled").addEventListener("change", e => psSetEnabled(e.target.checked));
     psEl("psMode").addEventListener("click", e => {
         const btn = e.target.closest(".seg-btn");
-        if (!btn || ps) return;
+        if (!btn || (ps && ps.peer) || btn.dataset.mode === psState.mode) return;
+        if (ps) psTeardown(null);
         psState.mode = btn.dataset.mode;
         psSave();
         psRender();
+        if (psState.mode === "send") psStartSender();
     });
     psEl("psName").addEventListener("change", e => { psState.name = e.target.value.trim().slice(0, 32); psSave(); });
-    psEl("psStart").addEventListener("click", psStartPairing);
-    psEl("psConnect").addEventListener("click", psConnectWithReply);
-    psEl("psJoin").addEventListener("click", psJoin);
-    psEl("psCancel").addEventListener("click", () => psTeardown("Pairing cancelled.", "idle"));
-    psEl("psCopyOffer").addEventListener("click", () => psCopy("psOfferOut"));
-    psEl("psCopyAnswer").addEventListener("click", () => psCopy("psAnswerOut"));
+    psEl("psNewCode").addEventListener("click", () => psStartSender());
+    const codeIn = psEl("psCodeIn");
+    codeIn.maxLength = PS_CONFIG.CODE_LENGTH;
+    codeIn.placeholder = "•".repeat(PS_CONFIG.CODE_LENGTH);
+    codeIn.addEventListener("input", () => {
+        codeIn.value = codeIn.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, PS_CONFIG.CODE_LENGTH);
+        if (psNormalizeCode(codeIn.value)) psStartReceiver(); // connect as soon as the full code is typed
+    });
+    codeIn.addEventListener("keydown", e => { if (e.key === "Enter") psStartReceiver(); });
+    psEl("psConnect").addEventListener("click", psStartReceiver);
+    psEl("psCancel").addEventListener("click", () => psTeardown("Cancelled.", "idle"));
     psEl("psSyncNow").addEventListener("click", psSyncNow);
     psEl("psDisconnect").addEventListener("click", () => psTeardown("Disconnected.", "idle"));
     if (psState.enabled) psSetEnabled(true); else psTeardown(null);

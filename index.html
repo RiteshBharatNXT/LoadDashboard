@@ -3057,6 +3057,21 @@ function parseTypeData(elementId, label) {
     return Array.from(merged.values()).sort((a, b) => predictionDate(a.date) - predictionDate(b.date));
 }
 
+// Data text areas are kept newest-first by date, however the rows were pasted.
+// Text with an invalid line is left as typed so error line numbers still match.
+function sortDataTextDesc(elementId) {
+    const el = document.getElementById(elementId);
+    const dateOf = line => line.trim().split(/\t+|\s{2,}|,/)[0];
+    const lines = el.value.split(/\r?\n/).filter(line => line.trim());
+    if (!lines.every(line => isValidDateString(dateOf(line)))) return;
+    const text = lines.sort((a, b) => dateOf(b).localeCompare(dateOf(a))).join("\n");
+    if (text !== el.value) el.value = text;
+}
+
+document.addEventListener("paste", event => {
+    if (event.target.matches("#dataInput, #instantDataInput, #classicDataInput")) setTimeout(() => sortDataTextDesc(event.target.id));
+});
+
 function getSelectedMetrics(elementId) {
     return Array.from(
         document.querySelectorAll(`#${elementId} input[type="checkbox"]:checked`)
@@ -3165,6 +3180,7 @@ async function generateChart(persist = true) {
 
         if (!rows.length) throw new Error("No valid transaction rows found.");
 
+        ["dataInput", "instantDataInput", "classicDataInput"].forEach(sortDataTextDesc);
         if (persist) await saveDashboardData();
 
         selectedStartIndex = 0;
@@ -5963,11 +5979,8 @@ async function psApply(payload) {
         const el = psEl(spec.input);
         snapshot[key] = el.value;
         if (!newLines[key].length) return;
-        // Data is kept newest-first, as it is pasted; existing lines stay exactly as typed.
-        const dateOf = line => line.trim().split(/\t+|\s{2,}|,/)[0];
-        const merged = el.value.split(/\r?\n/).filter(line => line.trim()).concat(newLines[key]);
-        merged.sort((a, b) => dateOf(b).localeCompare(dateOf(a)));
-        el.value = merged.join("\n");
+        el.value = el.value.split(/\r?\n/).filter(line => line.trim()).concat(newLines[key]).join("\n");
+        sortDataTextDesc(spec.input);
     });
     try {
         psReadLocal();

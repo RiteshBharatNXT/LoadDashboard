@@ -5963,8 +5963,11 @@ async function psApply(payload) {
         const el = psEl(spec.input);
         snapshot[key] = el.value;
         if (!newLines[key].length) return;
-        const existing = el.value.replace(/\s+$/, "");
-        el.value = (existing ? existing + "\n" : "") + newLines[key].join("\n");
+        // Data is kept newest-first, as it is pasted; existing lines stay exactly as typed.
+        const dateOf = line => line.trim().split(/\t+|\s{2,}|,/)[0];
+        const merged = el.value.split(/\r?\n/).filter(line => line.trim()).concat(newLines[key]);
+        merged.sort((a, b) => dateOf(b).localeCompare(dateOf(a)));
+        el.value = merged.join("\n");
     });
     try {
         psReadLocal();

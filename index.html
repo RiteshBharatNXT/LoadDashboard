@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Transaction Load Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 <script>
 // Phones get a view-and-sync-only dashboard; data editing stays on desktop.
@@ -1371,7 +1374,7 @@ body.no-data .empty-hint { display: block; }
 .hm-label { display: flex; align-items: center; font-weight: 700; color: var(--text); font-size: 12px; }
 .hm-c { height: 26px; border-radius: 5px; background: color-mix(in srgb, var(--accent) calc(var(--t, 0) * 90% + 6%), var(--surface-muted)); cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
 .hm-c:hover { position: relative; z-index: 1; transform: scale(1.22); box-shadow: 0 4px 14px rgba(0,0,0,.2); }
-.hm-c.we { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--text) 22%, transparent); }
+.hm-c.we { box-shadow: inset 0 -3px 0 var(--red); }
 .hm-c.void { background: transparent; cursor: default; }
 .hm-c.future { background: transparent; border: 1px dashed var(--border); cursor: default; }
 .hm-c.void:hover, .hm-c.future:hover { transform: none; box-shadow: none; }
@@ -1383,7 +1386,7 @@ body.no-data .empty-hint { display: block; }
 .hm-scale { width: 130px; height: 10px; border-radius: 99px; background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 6%, var(--surface-muted)), var(--accent)); }
 .hm-key { display: inline-block; width: 16px; height: 14px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 40%, var(--surface-muted)); }
 .hm-key.missing { background: repeating-linear-gradient(45deg, var(--surface-muted) 0 3px, color-mix(in srgb, var(--red) 35%, transparent) 3px 5px); }
-.hm-key.we { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--text) 22%, transparent); }
+.hm-key.we { box-shadow: inset 0 -3px 0 var(--red); }
 .hm-key.asof { outline: 2px solid var(--text); outline-offset: 1px; }
 .hm-key.cmp { background: var(--accent); }
 .hm-reset { margin-left: auto; padding: 7px 14px; font-size: 13px; }
@@ -1391,6 +1394,9 @@ body.no-data .empty-hint { display: block; }
 .an-tip { position: fixed; z-index: 1400; left: 0; top: 0; pointer-events: none; padding: 10px 12px; border-radius: 10px; background: var(--tooltip-bg); color: #f8fafc; font-size: 12.5px; line-height: 1.55; box-shadow: 0 14px 34px rgba(0,0,0,.28); opacity: 0; transform: translateY(4px); transition: opacity .12s ease, transform .12s ease; max-width: 290px; }
 .an-tip.show { opacity: 1; transform: none; }
 .tip-hint { margin-top: 6px; font-size: 11px; color: #cbd5e1; }
+.tip-row { display: flex; justify-content: space-between; gap: 16px; font-variant-numeric: tabular-nums; }
+.tip-bar { height: 7px; margin: 7px 0 3px; border-radius: 99px; background: rgba(255,255,255,.18); overflow: hidden; }
+.tip-bar span { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
 
 .health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
 .chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1504,6 +1510,104 @@ html.phone-view #bankHolidayStatus { display: none !important; }
     .an-number { width: 100%; }
     .verdict-list div { font-size: 12.5px; }
 }
+/* ===== Quieter layout: hints, expanders, collapsible sections ===== */
+.audience { display: none; }
+.section-head p.read-hint { display: inline-block; margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: var(--accent-soft); color: var(--text); font-size: 12.5px; }
+.read-hint b { color: var(--accent); }
+details.advanced { margin-top: 14px; }
+details.advanced > summary { cursor: pointer; padding: 8px 0; font-size: 13px; font-weight: 700; color: var(--text-soft); }
+.prediction-card details.advanced > summary { color: #cbd5e1; }
+.insight-list.collapsed li:nth-child(n+6) { display: none; }
+/* ===== Key insights: scannable rows ===== */
+.ins-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.ins-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-muted); font-size: 12px; font-weight: 700; color: var(--text); }
+.ins-chip .ins-icon { flex-basis: 20px; width: 20px; height: 20px; margin: 0; border-radius: 50%; font-size: 10px; }
+.insight-list li.ins { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 14px 10px 12px; border-left: 3px solid var(--ins-c, var(--accent)); line-height: 1.4; }
+.insight-list li.ins-up { --ins-c: var(--success); }
+.insight-list li.ins-down { --ins-c: var(--red); }
+.insight-list li.ins-warn { --ins-c: var(--orange); }
+.insight-list li.ins-info { --ins-c: var(--accent); }
+.ins-title { font-weight: 700; font-size: 13.5px; color: var(--text); }
+.ins-detail { margin-top: 2px; font-size: 12.5px; color: var(--text-soft); }
+.ins-side { text-align: right; white-space: nowrap; }
+.ins-value { font-size: 16px; font-weight: 800; letter-spacing: -.01em; color: var(--text); font-variant-numeric: tabular-nums; }
+.ins-value small { font-size: 11.5px; font-weight: 600; color: var(--text-soft); }
+.ins-delta { margin-top: 1px; font-size: 12px; }
+@media (max-width: 640px) { .insight-list li.ins { grid-template-columns: 24px minmax(0, 1fr); } .ins-side { grid-column: 2; text-align: left; white-space: normal; } }
+.insight-more { margin-top: 10px; padding: 7px 12px; font-size: 13px; }
+.section-toggle { padding: 7px 12px; font-size: 12.5px; }
+.dash-section.collapsed > :not(.section-head) { display: none !important; }
+.dash-section.collapsed .section-head { margin-bottom: 0; }
+/* ===== Forecast card: same surface as other cards, follows the active theme ===== */
+html[data-theme] #predictionCard { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: var(--shadow); }
+html[data-theme] #predictionCard:hover { border-color: var(--border-strong); }
+#predictionCard .prediction-meta,
+#predictionCard .prediction-label,
+#predictionCard .prediction-sub,
+#predictionCard .prediction-stat.primary-result .prediction-label,
+#predictionCard .prediction-stat.primary-result .prediction-sub,
+#predictionCard .prediction-date-control label,
+#predictionCard .model-table th,
+#predictionCard .reasons-summary,
+#predictionCard details.advanced > summary { color: var(--text-soft); }
+html[data-theme] #predictionCard .prediction-stat { background: var(--surface-muted); border-color: var(--border); box-shadow: none; }
+html[data-theme] #predictionCard .prediction-stat:hover { background: var(--surface-solid); }
+html[data-theme] #predictionCard .prediction-stat.primary-result { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--surface-solid)), var(--surface)); border-color: color-mix(in srgb, var(--accent) 34%, var(--border)); }
+#predictionCard .prediction-stat.primary-result .prediction-value { color: var(--accent); }
+#predictionCard .info-tip { border-color: var(--border-strong); color: var(--text-soft); }
+#predictionCard .prediction-date-control input[type="date"] { background: var(--surface-solid); color: var(--text); border-color: var(--border-strong); color-scheme: inherit; }
+#predictionCard .model-table th, #predictionCard .model-table td { border-bottom-color: var(--border); }
+#predictionCard .model-table tbody tr:hover { background: var(--accent-soft); }
+#predictionCard .model-good { color: var(--success); }
+#predictionCard .model-warn { color: var(--orange); }
+#predictionCard .model-bad { color: var(--red); }
+html[data-theme] #predictionCard .prediction-reasons { background: var(--surface-muted); border-color: var(--border); }
+#predictionCard .reasons-toggle { color: var(--text); }
+#predictionCard .reasons-toggle:hover { background: var(--accent-soft); }
+#predictionCard .reasons-list { color: var(--text); }
+/* ===== Lifetime totals: one compact card ===== */
+.life-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.life-cell { min-width: 0; padding: 12px 14px; border-radius: 11px; background: var(--surface-muted); border: 1px solid var(--border); }
+.life-label { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); }
+.life-label i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.life-value { margin-top: 4px; font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: var(--text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.life-sub { margin-top: 2px; font-size: 12.5px; color: var(--text-soft); }
+@media (max-width: 640px) { .life-grid { grid-template-columns: minmax(0, 1fr); } }
+/* ===== Design system: one consistent look for every section =====
+   Two radii (card, tile), one heading scale, still surfaces (no hover lift),
+   section toggle always top-right, "How to read" as a quiet accent-edged note. */
+:root { --radius-card: 14px; --radius-tile: 10px; }
+body { font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01"; }
+.card, .date-range-container, .kpi { border-radius: var(--radius-card); }
+.card { padding: 20px; }
+.life-cell, .insight-list li, .verdict, .verdict-empty, .ok-state, .ps-step, .prediction-stat, .prediction-reasons, .an-table-wrap, .phone-note { border-radius: var(--radius-tile); }
+html[data-theme] .card:hover, html[data-theme] .kpi:hover, html[data-theme] .stat:hover, html[data-theme] .range-stat:hover, html[data-theme] .prediction-stat:hover { transform: none; }
+.card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+.card-sub { margin: 0 0 14px; font-size: 12.5px; line-height: 1.5; }
+.an-toolbar .card-sub { margin: 0; }
+.section-head { display: block; position: relative; padding-right: 140px; margin-bottom: 14px; }
+.section-head h2 { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.section-head p { max-width: 980px; }
+.section-head p.read-hint { display: block; margin-top: 8px; padding: 2px 0 2px 10px; border-left: 3px solid var(--accent); border-radius: 0; background: none; color: var(--text-soft); font-size: 12.5px; line-height: 1.55; }
+.section-head .section-toggle { position: absolute; top: 0; right: 0; }
+.dash-section.collapsed .section-head p { display: none; }
+.kpi-label, .life-label, .sig-label, .gc, .an-table th, #predictionCard .prediction-date-control label { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+#predictionCard .prediction-date-control label { width: 100%; margin-bottom: -4px; }
+#predictionRange { font-size: 20px; white-space: nowrap; }
+.kpi-value, .life-value, .ins-value, .prediction-value, .stat-value, .hm-tot, .an-table td { font-variant-numeric: tabular-nums; }
+.secondary, .collapse-toggle, .section-toggle, .step-btn { font-weight: 600; }
+@media (max-width: 640px) {
+    .section-head { padding-right: 0; }
+    .section-head .section-toggle { position: static; margin-top: 10px; }
+}
+/* ===== Range Explorer: compact controls and stats ===== */
+.explorer-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 8px; }
+.explorer-range { margin-left: auto; align-self: center; font-size: 13.5px; font-weight: 700; color: var(--accent); }
+.explorer-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 14px; }
+@media (max-width: 900px) { .explorer-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .explorer-stats { grid-template-columns: minmax(0, 1fr); } .explorer-range { margin-left: 0; } }
+.forecast-more { margin-top: 12px; }
+.forecast-toggle { margin-top: 14px; }
 </style>
 </head>
 <body class="no-data">
@@ -1705,7 +1809,8 @@ html.phone-view #bankHolidayStatus { display: none !important; }
 
     <section class="dash-section needs-data" id="sec-forecast">
         <div class="section-head">
-            <div><h2>Forecast</h2><p>End-of-day prediction with backtested accuracy, and same-weekday history.</p></div>
+            <div><h2>Forecast</h2><p>End-of-day prediction with backtested accuracy, and same-weekday history.</p>
+            <p class="read-hint"><b>How to read:</b> the highlighted card is the expected end-of-day amount; the range is where it will most likely land. Press <b>Show details</b> for accuracy, reasoning and same-weekday history.</p></div>
             <div class="audience" aria-label="Most useful for"><span>CEO</span><span>Finance</span><span>CTO</span></div>
         </div>
     <div class="card prediction-card" id="predictionCard">
@@ -1725,6 +1830,9 @@ html.phone-view #bankHolidayStatus { display: none !important; }
             <div class="prediction-stat primary-result"><div class="prediction-label-row"><div class="prediction-label">Projected EOD Success Amount</div><span class="info-tip" data-tip="The model's central estimate of the total successful loaded amount expected by End of Day. It combines recent history, same-weekday behavior, trend, success count and average ticket size.">i</span></div><div class="prediction-value" id="predictionEodAmount">₹0</div><div class="prediction-sub" id="predictionRemaining">Expected remaining: ₹0</div></div>
             <div class="prediction-stat"><div class="prediction-label-row"><div class="prediction-label">Expected Range</div><span class="info-tip" data-tip="The uncertainty band around the central forecast. Example: ₹20.5L - ₹72.4L means the model expects the final EOD result to plausibly fall inside that band based on historical forecast errors. A wide range means historical outcomes were harder to predict.">i</span></div><div class="prediction-value" id="predictionRange">₹0 - ₹0</div><div class="prediction-sub" id="predictionIntervalLabel">Empirical prediction interval</div></div>
             <div class="prediction-stat"><div class="prediction-label-row"><div class="prediction-label">Projected Success Count</div><span class="info-tip" data-tip="Estimated total number of successful transactions by EOD. Example: 253 means the model expects roughly 253 successful loads for the full day. Expected avg ticket is the forecast average successful amount per successful transaction.">i</span></div><div class="prediction-value" id="predictionCount">0</div><div class="prediction-sub" id="predictionTicket">Expected avg ticket: ₹0</div></div>
+        </div>
+        <div class="forecast-more" id="forecastMore" hidden>
+        <div class="prediction-grid">
             <div class="prediction-stat"><div class="prediction-label-row"><div class="prediction-label">Selected Training Window</div><span class="info-tip" data-tip="Number of recent calendar days used by the winning model. The dashboard tests several windows and selects the one with the best historical backtest score instead of using a fixed cutoff date.">i</span></div><div class="prediction-value" id="predictionWindow">-</div><div class="prediction-sub">Automatically selected by backtest</div></div>
             <div class="prediction-stat"><div class="prediction-label-row"><div class="prediction-label">Historical WAPE</div><span class="info-tip" data-tip="WAPE = Weighted Absolute Percentage Error. It measures total absolute prediction error divided by total actual amount during backtesting. Lower is better. Example: 12% WAPE means historical forecast errors were about 12% of actual volume overall.">i</span></div><div class="prediction-value" id="predictionWape">-</div><div class="prediction-sub">Lower is better</div></div>
             <div class="prediction-stat"><div class="prediction-label-row"><div class="prediction-label">Historical Bias</div><span class="info-tip" data-tip="Bias shows whether the model systematically over-predicts or under-predicts. Positive means forecasts were generally too high. Negative means forecasts were generally too low. Closer to 0% is better.">i</span></div><div class="prediction-value" id="predictionBias">-</div><div class="prediction-sub">Near 0% is better</div></div>
@@ -1739,6 +1847,8 @@ html.phone-view #bankHolidayStatus { display: none !important; }
                 <ul class="reasons-list" id="predictionReasonList"><li>Generate the dashboard to see the reasoning.</li></ul>
             </div></div>
         </div>
+        <details class="advanced">
+        <summary>Model details (developers): window comparison and backtest scores</summary>
         <div class="model-table-wrap">
             <table class="model-table">
                 <thead><tr>
@@ -1752,43 +1862,45 @@ html.phone-view #bankHolidayStatus { display: none !important; }
             </table>
         </div>
         <div class="prediction-sub" style="margin-top:12px;"><span class="info-tip" data-tip="P80 means an 80th-percentile empirical error band. The dashboard looks at historical backtest percentage errors and uses the 80th percentile of those errors to create the displayed lower and upper forecast range. It is an empirical uncertainty range, not a guarantee that the result will land inside it exactly 80% of the time.">i</span> <span id="p80HelpText">P80 empirical range: hover the i icon for meaning.</span></div>
+        </details>
+        </div>
+        <button type="button" class="secondary forecast-toggle" id="forecastMoreToggle" aria-expanded="false" aria-controls="forecastMore forecastHistory">Show details: accuracy, reasoning &amp; weekday history</button>
     </div>
 
+    <div id="forecastHistory" hidden>
     <div class="card">
-        <div class="chart-header">
-            <div><h3 id="weekdayHistoryTitle">Same-Weekday Historical Trend</h3><div class="history-note" id="weekdayHistoryNote">Shows historical records for the same weekday as the latest date and appends today's projection.</div></div>
-            <div class="history-controls">
-                <div class="history-control">
-                    <div class="history-control-label">Historical metrics</div>
-                    <div class="multi-select" id="weekdayMetricSelect"><button type="button" class="multi-select-button" onclick="toggleDropdown('weekdayMetricSelect')">Select Metrics</button><div class="multi-select-options">
-                        <label class="multi-select-option"><input type="checkbox" value="txnCount" checked onchange="handleWeekdayMetricChange()"> Total Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="txnAmount" checked onchange="handleWeekdayMetricChange()"> Total Amount</label>
-                        <label class="multi-select-option"><input type="checkbox" value="successCount" checked onchange="handleWeekdayMetricChange()"> Success Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="successAmount" checked onchange="handleWeekdayMetricChange()"> Success Amount</label>
-                        <label class="multi-select-option"><input type="checkbox" value="failedCount" onchange="handleWeekdayMetricChange()"> Failure Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="failedAmount" onchange="handleWeekdayMetricChange()"> Failure Amount</label>
-                    </div></div>
-                </div>
-                <div class="history-control">
-                    <div class="history-control-label">Today's projection lines</div>
-                    <div class="multi-select" id="weekdayProjectionSelect"><button type="button" class="multi-select-button" onclick="toggleDropdown('weekdayProjectionSelect')">Select Projections</button><div class="multi-select-options">
-                        <label class="multi-select-option"><input type="checkbox" value="txnCount" checked onchange="updateWeekdayHistoryChart()"> Total Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="txnAmount" checked onchange="updateWeekdayHistoryChart()"> Total Amount</label>
-                        <label class="multi-select-option"><input type="checkbox" value="successCount" checked onchange="updateWeekdayHistoryChart()"> Success Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="successAmount" checked onchange="updateWeekdayHistoryChart()"> Success Amount</label>
-                        <label class="multi-select-option"><input type="checkbox" value="failedCount" onchange="updateWeekdayHistoryChart()"> Failure Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="failedAmount" onchange="updateWeekdayHistoryChart()"> Failure Amount</label>
-                    </div></div>
-                </div>
+        <div class="an-toolbar">
+            <div><h3 id="weekdayHistoryTitle">Same-weekday trend</h3><div class="card-sub" id="weekdayHistoryNote">Past values for the same weekday as the prediction date, plus the forecast.</div></div>
+            <div class="an-toolbar-actions">
+                <label class="gc">Metric
+                    <select id="weekdayMetric" class="an-select" onchange="handleWeekdayChartChange()">
+                        <option value="successAmount" selected>Success Amount</option>
+                        <option value="successCount">Success Count</option>
+                        <option value="txnAmount">Total Amount</option>
+                        <option value="txnCount">Total Count</option>
+                        <option value="failedAmount">Failure Amount</option>
+                        <option value="failedCount">Failure Count</option>
+                    </select>
+                </label>
+                <label class="gc">Weeks
+                    <select id="weekdayWeeks" class="an-select" onchange="handleWeekdayChartChange()">
+                        <option value="8">Last 8</option>
+                        <option value="12" selected>Last 12</option>
+                        <option value="26">Last 26</option>
+                        <option value="0">All</option>
+                    </select>
+                </label>
             </div>
         </div>
-        <div class="history-chart-container"><canvas id="weekdayHistoryChart"></canvas></div>
+        <div class="an-chart"><canvas id="weekdayHistoryChart"></canvas></div>
+    </div>
     </div>
     </section>
 
     <section class="dash-section needs-data" id="sec-summary">
         <div class="section-head">
-            <div><h2>Executive Summary</h2><p id="anSummaryCaption">—</p></div>
+            <div><h2>Executive Summary</h2><p id="anSummaryCaption">—</p>
+            <p class="read-hint"><b>How to read:</b> top-left tile is the headline number. ▲ green = better than the comparison, ▼ red = worse. Each comparison shows the % change, the actual difference in brackets, then what it is compared with and that value.<br><b>MTD</b> = month-to-date: from the 1st of the month up to the as-of day. Every month is compared over those same days, so a half-finished month is compared fairly.</p></div>
             <div class="audience" aria-label="Most useful for"><span>CEO</span><span>CBO</span><span>Finance</span></div>
         </div>
         <div class="kpi-grid" id="anKpis"></div>
@@ -1796,8 +1908,10 @@ html.phone-view #bankHolidayStatus { display: none !important; }
         <div class="insight-layout">
             <div class="card">
                 <h3>Key insights</h3>
-                <div class="card-sub">Generated from your data for the selected as-of date and metric</div>
+                <div class="card-sub">Most important first: things to check, then declines, then gains, then context. Biggest moves first in each group.</div>
+                <div class="ins-summary" id="anInsightSummary"></div>
                 <ul class="insight-list" id="anInsights"></ul>
+                <button type="button" class="secondary insight-more" id="anInsightsMore" hidden></button>
             </div>
             <div class="card">
                 <h3>Trend verdict</h3>
@@ -1805,40 +1919,33 @@ html.phone-view #bankHolidayStatus { display: none !important; }
                 <div id="anTrendVerdict"></div>
             </div>
         </div>
-        <h3 class="sub-heading">Lifetime totals <span>all loaded data</span></h3>
-    <div class="stats">
-        <div class="stat success-count">
-            <div class="stat-title">Total Success Transactions</div>
-            <div class="stat-value" id="totalSuccessCount">0</div>
+        <div class="card life-card">
+            <h3>Lifetime totals</h3>
+            <div class="card-sub">All loaded data · <span id="lifetimeRange">—</span></div>
+            <div class="life-grid">
+                <div class="life-cell" style="--c: var(--success)">
+                    <div class="life-label"><i></i>Success</div>
+                    <div class="life-value" id="totalSuccessAmount">₹0</div>
+                    <div class="life-sub"><span id="totalSuccessCount">0</span> transactions</div>
+                </div>
+                <div class="life-cell" style="--c: var(--red)">
+                    <div class="life-label"><i></i>Failed</div>
+                    <div class="life-value" id="totalFailedAmount">₹0</div>
+                    <div class="life-sub"><span id="totalFailedCount">0</span> transactions</div>
+                </div>
+                <div class="life-cell" style="--c: var(--violet)">
+                    <div class="life-label"><i></i>Total attempted</div>
+                    <div class="life-value" id="totalTransactionAmount">₹0</div>
+                    <div class="life-sub"><span id="totalTransactionCount">0</span> transactions · <span id="lifetimeSuccessRate">0%</span> succeeded</div>
+                </div>
+            </div>
         </div>
-        <div class="stat success-amount">
-            <div class="stat-title">Total Success Amount</div>
-            <div class="stat-value" id="totalSuccessAmount">₹0</div>
-        </div>
-        <div class="stat failed-count">
-            <div class="stat-title">Total Failed Transactions</div>
-            <div class="stat-value" id="totalFailedCount">0</div>
-        </div>
-        <div class="stat failed-amount">
-            <div class="stat-title">Total Failed Amount</div>
-            <div class="stat-value" id="totalFailedAmount">₹0</div>
-        </div>
-        <div class="stat total-count">
-            <div class="stat-title">Total Transaction Count</div>
-            <div class="stat-value" id="totalTransactionCount">0</div>
-            <div class="stat-subtitle">Success + Failed</div>
-        </div>
-        <div class="stat total-amount">
-            <div class="stat-title">Total Transaction Amount</div>
-            <div class="stat-value" id="totalTransactionAmount">₹0</div>
-            <div class="stat-subtitle">Success Amount + Failed Amount</div>
-        </div>
-    </div>
     </section>
 
     <section class="dash-section needs-data" id="sec-mtd">
         <div class="section-head">
-            <div><h2>Month-to-Date Comparison</h2><p>Every month compared on the same days, <b class="an-cut-text">day 1–25</b>, plus a single-day comparison across months.</p></div>
+            <div><h2>Month-to-Date Comparison</h2><p>Every month compared on the same days, <b class="an-cut-text">day 1–25</b>, plus a single-day comparison across months.</p>
+            <p class="read-hint"><b>How to read:</b> the highlighted row is this month. Compare its till-date value with the rows above; the "Current vs" column says how this month beats or trails each one.</p></div>
             <div class="audience" aria-label="Most useful for"><span>CEO</span><span>CBO</span><span>Finance</span><span>Manager</span></div>
         </div>
         <div class="card">
@@ -1876,7 +1983,8 @@ html.phone-view #bankHolidayStatus { display: none !important; }
 
     <section class="dash-section needs-data" id="sec-calendar">
         <div class="section-head">
-            <div><h2>Daily Calendar Heatmap</h2><p>One cell per day; darker means higher. Hover for details, click a day to analyse as of that date.</p></div>
+            <div><h2>Daily Calendar Heatmap</h2><p>One cell per day; darker means higher. Hover for details, click a day to analyse as of that date.</p>
+            <p class="read-hint"><b>How to read:</b> scan columns for the month-start and month-end peaks, and look for striped red cells (missing data) or pale cells on weekdays (unusually quiet days).</p></div>
             <div class="audience" aria-label="Most useful for"><span>Manager</span><span>Finance</span><span>CTO</span></div>
         </div>
         <div class="card">
@@ -1894,7 +2002,8 @@ html.phone-view #bankHolidayStatus { display: none !important; }
 
     <section class="dash-section needs-data" id="sec-trends">
         <div class="section-head">
-            <div><h2>Trends &amp; Growth</h2><p>Monthly totals, month-over-month growth, and the daily trend with moving averages.</p></div>
+            <div><h2>Trends &amp; Growth</h2><p>Monthly totals, month-over-month growth, and the daily trend with moving averages.</p>
+            <p class="read-hint"><b>How to read:</b> green growth bars = month beat the one before. In the daily chart, follow the 30-day line for direction; the 7-day line shows recent turns.</p></div>
             <div class="audience" aria-label="Most useful for"><span>CEO</span><span>CBO</span><span>CTO</span></div>
         </div>
         <div class="an-grid-2">
@@ -1911,8 +2020,9 @@ html.phone-view #bankHolidayStatus { display: none !important; }
         </div>
         <div class="card">
             <div class="an-toolbar">
-                <div><h3>Daily trend</h3><div class="card-sub">Daily values with 7-day and 30-day averages and a straight-line trend.</div></div>
+                <div><h3>Daily trend</h3><div class="card-sub">Daily values with 7-day and 30-day averages and a straight-line trend. Hover to see which dates each average covers.</div></div>
                 <div class="range-presets" id="anDailyRange" role="group" aria-label="Daily trend range">
+                    <button type="button" class="seg-btn" data-range="-1" title="From the 1st of the as-of month">This month</button>
                     <button type="button" class="seg-btn" data-range="30">30D</button>
                     <button type="button" class="seg-btn" data-range="90">90D</button>
                     <button type="button" class="seg-btn" data-range="180">180D</button>
@@ -1924,32 +2034,28 @@ html.phone-view #bankHolidayStatus { display: none !important; }
             <div class="kpi-grid ops-grid trend-stats" id="anTrendStats"></div>
         </div>
     <div class="card">
-        <div class="chart-header">
-            <h3>Transaction Type Trend</h3>
-            <div class="chart-controls">
-                <div class="multi-select" id="transactionTypeSelect">
-                    <button type="button" class="multi-select-button" onclick="toggleDropdown('transactionTypeSelect')">Select Metrics</button>
-                    <div class="multi-select-options">
-                        <label class="multi-select-option"><input type="checkbox" value="totalCount" checked onchange="updateTransactionTypeChart()"> Total Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="totalAmount" checked onchange="updateTransactionTypeChart()"> Total Amount</label>
-                        <label class="multi-select-option"><input type="checkbox" value="instantCount" checked onchange="updateTransactionTypeChart()"> Instant Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="instantAmount" checked onchange="updateTransactionTypeChart()"> Instant Amount</label>
-                        <label class="multi-select-option"><input type="checkbox" value="classicCount" checked onchange="updateTransactionTypeChart()"> Classic Count</label>
-                        <label class="multi-select-option"><input type="checkbox" value="classicAmount" checked onchange="updateTransactionTypeChart()"> Classic Amount</label>
-                    </div>
+        <div class="an-toolbar">
+            <div><h3>Transaction type trend</h3><div class="card-sub">Daily Instant vs Classic. Colour = type (violet total, blue instant, orange classic). Solid = amount, dashed = count.</div></div>
+            <div class="multi-select" id="transactionTypeSelect">
+                <button type="button" class="multi-select-button" onclick="toggleDropdown('transactionTypeSelect')">Select Metrics</button>
+                <div class="multi-select-options">
+                    <label class="multi-select-option"><input type="checkbox" value="totalAmount" checked onchange="updateTransactionTypeChart()"> Total Amount</label>
+                    <label class="multi-select-option"><input type="checkbox" value="instantAmount" checked onchange="updateTransactionTypeChart()"> Instant Amount</label>
+                    <label class="multi-select-option"><input type="checkbox" value="classicAmount" checked onchange="updateTransactionTypeChart()"> Classic Amount</label>
+                    <label class="multi-select-option"><input type="checkbox" value="totalCount" onchange="updateTransactionTypeChart()"> Total Count</label>
+                    <label class="multi-select-option"><input type="checkbox" value="instantCount" onchange="updateTransactionTypeChart()"> Instant Count</label>
+                    <label class="multi-select-option"><input type="checkbox" value="classicCount" onchange="updateTransactionTypeChart()"> Classic Count</label>
                 </div>
             </div>
         </div>
-        <div class="info">Area graph for Total, Instant and Classic transaction count and amount.</div>
-        <div class="chart-container">
-            <canvas id="transactionTypeChart"></canvas>
-        </div>
+        <div class="an-chart"><canvas id="transactionTypeChart"></canvas></div>
     </div>
     </section>
 
     <section class="dash-section needs-data" id="sec-patterns">
         <div class="section-head">
-            <div><h2>Patterns &amp; Quality</h2><p>When in the month load happens, and how success rate and ticket size move month to month.</p></div>
+            <div><h2>Patterns &amp; Quality</h2><p>When in the month load happens, and how success rate and ticket size move month to month.</p>
+            <p class="read-hint"><b>How to read:</b> if the current-month line sits above the bars, this month is running ahead of a typical month on those days. A falling success rate points to failures, not demand.</p></div>
             <div class="audience" aria-label="Most useful for"><span>Manager</span><span>CTO</span><span>Finance</span></div>
         </div>
         <div class="card">
@@ -1973,14 +2079,16 @@ html.phone-view #bankHolidayStatus { display: none !important; }
 
     <section class="dash-section needs-data" id="sec-explorer">
         <div class="section-head">
-            <div><h2>Range Explorer</h2><p>Pick any date range with the slider or presets. Everything in this section follows that range.</p></div>
+            <div><h2>Range Explorer</h2><p>Totals and charts for any date range or a single month.</p>
+            <p class="read-hint"><b>How to read:</b> pick a month, a quick range, or drag the slider. The totals and both charts follow that range.</p></div>
             <div class="audience" aria-label="Most useful for"><span>Manager</span><span>Developer</span></div>
         </div>
-    <div class="date-range-container">
-        <div class="date-range-header">
-            <div class="date-range-title">Select Transaction Date Range</div>
-            <div class="date-range-actions">
-                <div class="date-range-value" id="sliderRangeText">All Dates</div>
+    <div class="card explorer-card">
+        <div class="explorer-controls">
+            <label class="gc">Month
+                <select id="explorerMonth" class="an-select" onchange="applyExplorerMonth(this.value)"><option value="">Custom range</option></select>
+            </label>
+            <div class="gc">Quick range
                 <div class="range-presets" role="group" aria-label="Quick date ranges">
                     <button type="button" class="preset-button" data-days="7" onclick="applyRangePreset(7)">7D</button>
                     <button type="button" class="preset-button" data-days="30" onclick="applyRangePreset(30)">30D</button>
@@ -1988,143 +2096,78 @@ html.phone-view #bankHolidayStatus { display: none !important; }
                     <button type="button" class="preset-button" data-days="0" onclick="applyRangePreset(0)">All</button>
                 </div>
             </div>
+            <div class="explorer-range" id="sliderRangeText">All dates</div>
         </div>
         <div class="slider-wrapper">
             <div class="slider-track"></div>
             <div class="slider-range" id="sliderRange"></div>
-            <input type="range" id="startDateSlider" class="range-input" min="0" max="0" value="0" step="1" oninput="handleSliderChange('start')">
-            <input type="range" id="endDateSlider" class="range-input" min="0" max="0" value="0" step="1" oninput="handleSliderChange('end')">
+            <input type="range" id="startDateSlider" class="range-input" min="0" max="0" value="0" step="1" oninput="handleSliderChange('start')" aria-label="Range start">
+            <input type="range" id="endDateSlider" class="range-input" min="0" max="0" value="0" step="1" oninput="handleSliderChange('end')" aria-label="Range end">
         </div>
-        <div class="date-labels">
-            <span id="minDateLabel">-</span>
-            <span id="maxDateLabel">-</span>
-        </div>
-        <div class="selected-date-labels">
-            <div class="selected-date">Start: <span id="selectedStartDate">-</span></div>
-            <div class="selected-date">End: <span id="selectedEndDate">-</span></div>
-        </div>
-    </div>
-
-    <div class="range-stats">
-        <div class="range-stat">
-            <div class="range-title">Selected Range - Success Transactions</div>
-            <div class="range-value" id="rangeSuccessCount">0</div>
-            <div class="range-date" id="rangeSuccessCountDate">No range selected</div>
-        </div>
-        <div class="range-stat amount">
-            <div class="range-title">Selected Range - Success Amount</div>
-            <div class="range-value" id="rangeSuccessAmount">₹0</div>
-            <div class="range-date" id="rangeSuccessAmountDate">No range selected</div>
-        </div>
-        <div class="range-stat failed">
-            <div class="range-title">Selected Range - Failed Transactions</div>
-            <div class="range-value" id="rangeFailedCount">0</div>
-            <div class="range-date" id="rangeFailedCountDate">No range selected</div>
-        </div>
-        <div class="range-stat failed-amount">
-            <div class="range-title">Selected Range - Failed Amount</div>
-            <div class="range-value" id="rangeFailedAmount">₹0</div>
-            <div class="range-date" id="rangeFailedAmountDate">No range selected</div>
-        </div>
-        <div class="range-stat total">
-            <div class="range-title">Selected Range - Transaction Count</div>
-            <div class="range-value" id="rangeTransactionCount">0</div>
-            <div class="range-date" id="rangeCountDate">No range selected</div>
-        </div>
-        <div class="range-stat total-amount">
-            <div class="range-title">Selected Range - Transaction Amount</div>
-            <div class="range-value" id="rangeTransactionAmount">₹0</div>
-            <div class="range-date" id="rangeAmountDate">No range selected</div>
-        </div>
-        <div class="range-stat success-rate">
-            <div class="range-title">Selected Range - Success Rate</div>
-            <div class="range-value" id="rangeSuccessRate">0%</div>
-            <div class="range-date" id="rangeSuccessRateDate">No range selected</div>
-        </div>
-        <div class="range-stat failed-rate">
-            <div class="range-title">Selected Range - Failed Rate</div>
-            <div class="range-value" id="rangeFailedRate">0%</div>
-            <div class="range-date" id="rangeFailedRateDate">No range selected</div>
+        <div class="date-labels"><span id="minDateLabel">-</span><span id="maxDateLabel">-</span></div>
+        <div class="life-grid explorer-stats">
+            <div class="life-cell" style="--c: var(--success)">
+                <div class="life-label"><i></i>Success</div>
+                <div class="life-value" id="rangeSuccessAmount">₹0</div>
+                <div class="life-sub"><span id="rangeSuccessCount">0</span> transactions</div>
+            </div>
+            <div class="life-cell" style="--c: var(--red)">
+                <div class="life-label"><i></i>Failed</div>
+                <div class="life-value" id="rangeFailedAmount">₹0</div>
+                <div class="life-sub"><span id="rangeFailedCount">0</span> transactions</div>
+            </div>
+            <div class="life-cell" style="--c: var(--violet)">
+                <div class="life-label"><i></i>Total attempted</div>
+                <div class="life-value" id="rangeTransactionAmount">₹0</div>
+                <div class="life-sub"><span id="rangeTransactionCount">0</span> transactions</div>
+            </div>
+            <div class="life-cell" style="--c: var(--accent)">
+                <div class="life-label"><i></i>Success rate</div>
+                <div class="life-value" id="rangeSuccessRate">0%</div>
+                <div class="life-sub">Failed rate <span id="rangeFailedRate">0%</span></div>
+            </div>
         </div>
     </div>
-
-    <div class="card">
-        <div class="chart-header">
-            <h3>Transaction Trend</h3>
-            <div class="chart-controls">
+    <div class="an-grid-2">
+        <div class="card">
+            <div class="an-toolbar">
+                <div><h3>Daily transactions</h3><div class="card-sub">Each day in the selected range. Solid = amount, dashed = count.</div></div>
                 <div class="multi-select" id="transactionSelect">
                     <button type="button" class="multi-select-button" onclick="toggleDropdown('transactionSelect')">Select Metrics</button>
                     <div class="multi-select-options">
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="txnCount" checked onchange="updateTransactionChart()">
-                            Total Transaction Count
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="successCount" checked onchange="updateTransactionChart()">
-                            Success Count
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="successAmount" checked onchange="updateTransactionChart()">
-                            Success Amount
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="failedCount" checked onchange="updateTransactionChart()">
-                            Failed Count
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="failedAmount" checked onchange="updateTransactionChart()">
-                            Failed Amount
-                        </label>
+                        <label class="multi-select-option"><input type="checkbox" value="successAmount" checked onchange="updateTransactionChart()"> Success Amount</label>
+                        <label class="multi-select-option"><input type="checkbox" value="failedAmount" checked onchange="updateTransactionChart()"> Failed Amount</label>
+                        <label class="multi-select-option"><input type="checkbox" value="successCount" onchange="updateTransactionChart()"> Success Count</label>
+                        <label class="multi-select-option"><input type="checkbox" value="failedCount" onchange="updateTransactionChart()"> Failed Count</label>
+                        <label class="multi-select-option"><input type="checkbox" value="txnCount" onchange="updateTransactionChart()"> Total Transaction Count</label>
                     </div>
                 </div>
             </div>
+            <div class="an-chart"><canvas id="transactionChart"></canvas></div>
         </div>
-        <div class="chart-container">
-            <canvas id="transactionChart"></canvas>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="chart-header">
-            <h3>Day-of-Week Transaction Trend</h3>
-            <div class="chart-controls">
+        <div class="card">
+            <div class="an-toolbar">
+                <div><h3>Average by weekday</h3><div class="card-sub">Average per day for each weekday in the selected range. Faded = count.</div></div>
                 <div class="multi-select" id="dayOfWeekSelect">
                     <button type="button" class="multi-select-button" onclick="toggleDropdown('dayOfWeekSelect')">Select Metrics</button>
                     <div class="multi-select-options">
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="txnCount" checked onchange="updateDayOfWeekChart()">
-                            Total Transaction Count
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="successCount" checked onchange="updateDayOfWeekChart()">
-                            Success Count
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="successAmount" checked onchange="updateDayOfWeekChart()">
-                            Success Amount
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="failedCount" checked onchange="updateDayOfWeekChart()">
-                            Failed Count
-                        </label>
-                        <label class="multi-select-option">
-                            <input type="checkbox" value="failedAmount" checked onchange="updateDayOfWeekChart()">
-                            Failed Amount
-                        </label>
+                        <label class="multi-select-option"><input type="checkbox" value="successAmount" checked onchange="updateDayOfWeekChart()"> Success Amount</label>
+                        <label class="multi-select-option"><input type="checkbox" value="failedAmount" checked onchange="updateDayOfWeekChart()"> Failed Amount</label>
+                        <label class="multi-select-option"><input type="checkbox" value="successCount" onchange="updateDayOfWeekChart()"> Success Count</label>
+                        <label class="multi-select-option"><input type="checkbox" value="failedCount" onchange="updateDayOfWeekChart()"> Failed Count</label>
+                        <label class="multi-select-option"><input type="checkbox" value="txnCount" onchange="updateDayOfWeekChart()"> Total Transaction Count</label>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="info">Average transaction activity by day of week across the selected date range.</div>
-        <div class="chart-container">
-            <canvas id="dayOfWeekChart"></canvas>
+            <div class="an-chart"><canvas id="dayOfWeekChart"></canvas></div>
         </div>
     </div>
     </section>
 
     <section class="dash-section needs-data" id="sec-health">
         <div class="section-head">
-            <div><h2>Data Health</h2><p>Completeness, freshness and anomaly checks for the loaded data.</p></div>
+            <div><h2>Data Health</h2><p>Completeness, freshness and anomaly checks for the loaded data.</p>
+            <p class="read-hint"><b>How to read:</b> any red tile means the numbers elsewhere may be off. Fix missing dates first, then check the unusual days.</p></div>
             <div class="audience" aria-label="Most useful for"><span>Developer</span><span>CTO</span></div>
         </div>
         <div class="health-grid" id="anHealthTiles"></div>
@@ -2141,6 +2184,18 @@ if (typeof Chart !== "undefined") {
     Chart.defaults.animation.duration = 520;
     Chart.defaults.animation.easing = "easeOutQuart";
     Chart.defaults.hover.animationDuration = 180;
+    // One chart style everywhere: same font, small round legend markers, same tooltip shape.
+    Chart.defaults.font.family = 'Inter, "Segoe UI", Roboto, Arial, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.boxWidth = 8;
+    Chart.defaults.plugins.legend.labels.boxHeight = 8;
+    Chart.defaults.plugins.legend.labels.padding = 14;
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 10;
+    Chart.defaults.plugins.tooltip.boxPadding = 4;
+    Chart.defaults.plugins.tooltip.usePointStyle = true;
+    Chart.defaults.plugins.tooltip.titleFont = { weight: "700" };
 }
 
 const PREDICTION_CONFIG = {
@@ -2164,6 +2219,17 @@ const PREDICTION_CONFIG = {
     BANK_HOLIDAY_FACTOR: 0.30,
     MIN_CALENDAR_FACTOR: 0.22,
     SEASONAL_LEARN_DAYS: 182,
+    // Keeps the forecast fast with years of data: backtest only the latest year of days,
+    // each using the last 238 rows (182 seasonal + 56 max window), which is all the models read.
+    BACKTEST_MAX_TARGETS: 365,
+    // Learned trend: robust straight line through the last 12 weeks of calendar-adjusted values.
+    TREND_LOOKBACK_DAYS: 84,
+    TREND_DAMPING: 0.6,
+    MAX_TREND_EFFECT: 0.15,
+    DOM_PRIOR_STRENGTH: 3,
+    POST_HOLIDAY_PRIOR_STRENGTH: 2,
+    YEAR_PRIOR_STRENGTH: 1,
+    BACKTEST_HISTORY_ROWS: 238,
     WEEKDAY_PRIOR_STRENGTH: 3,
     MONTH_PRIOR_STRENGTH: 4,
     HOLIDAY_PRIOR_STRENGTH: 2,
@@ -2185,6 +2251,7 @@ const SEASONAL_MONTH_BUCKETS = [
 ];
 
 let seasonalFactorCache = new Map();
+let seasonalYearCache = new Map();
 
 function isValidDateString(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -2448,19 +2515,36 @@ function seasonalLearnFactors(history, metric) {
     }));
 
     // Month phase: weekday-adjusted value vs centred ~31-day mean, as a correction on the configured month-cycle prior.
-    const weekdayAdjusted = rows.map((row, i) => values[i] / weekday[row.dateObj.getDay()].factor);
+    const info = rows.map(row => seasonalDateInfo(row.date, row.dateObj));
+    const weekdayAdjusted = rows.map((row, i) => values[i] / weekday[info[i].dow].factor);
     const monthRatios = SEASONAL_MONTH_BUCKETS.map(() => []);
     rows.forEach((row, i) => {
         if (isHoliday[i] || values[i] <= 0) return;
         const level = seasonalWindowMean(weekdayAdjusted, isHoliday, i, 15);
         if (level > 0) {
-            monthRatios[seasonalBucketIndex(row.dateObj.getDate())].push(weekdayAdjusted[i] / level / predictionMonthCycleAdjustment(row.dateObj));
+            monthRatios[info[i].bucket].push(weekdayAdjusted[i] / level / info[i].cycle);
         }
     });
     const month = monthRatios.map(ratios => ({
         factor: predictionClamp(seasonalShrink(ratios, 1, cfg.MONTH_PRIOR_STRENGTH), 0.6, 1.6),
         samples: ratios.length
     }));
+
+    // Exact date of month: correction on top of the phase, keyed by day number, or days-before-month-end for the last 5 days.
+    const dayRatios = new Map();
+    rows.forEach((row, i) => {
+        if (isHoliday[i] || values[i] <= 0) return;
+        const level = seasonalWindowMean(weekdayAdjusted, isHoliday, i, 15);
+        if (level <= 0) return;
+        const expected = info[i].cycle * month[info[i].bucket].factor;
+        const dayKey = info[i].dayKey;
+        if (!dayRatios.has(dayKey)) dayRatios.set(dayKey, []);
+        dayRatios.get(dayKey).push(weekdayAdjusted[i] / level / expected);
+    });
+    const day = new Map([...dayRatios].map(([dayKey, ratios]) => [dayKey, {
+        factor: predictionClamp(seasonalShrink(ratios, 1, cfg.DOM_PRIOR_STRENGTH), 0.7, 1.4),
+        samples: ratios.length
+    }]));
 
     // Bank holidays: value vs what a normal day of that weekday would be.
     const holidayRatios = [];
@@ -2475,41 +2559,173 @@ function seasonalLearnFactors(history, metric) {
         samples: holidayRatios.length
     };
 
-    const factors = { weekday, month, holiday };
+    // Day after a bank holiday: catch-up volume vs a normal day of that weekday.
+    const postRatios = [];
+    const postDates = seasonalPostHolidayDates();
+    rows.forEach((row, i) => {
+        if (isHoliday[i] || values[i] <= 0 || !postDates.has(row.date)) return;
+        const level = seasonalWindowMean(values, isHoliday, i, 3);
+        if (level > 0) postRatios.push(values[i] / (level * weekday[row.dateObj.getDay()].factor));
+    });
+    const postHoliday = {
+        factor: predictionClamp(seasonalShrink(postRatios, 1, cfg.POST_HOLIDAY_PRIOR_STRENGTH), 0.8, 2),
+        samples: postRatios.length
+    };
+
+    const factors = { weekday, month, day, holiday, postHoliday };
     seasonalFactorCache.set(key, factors);
     return factors;
 }
 
-function seasonalCalendarFactor(factors, dateObj, isoDate) {
-    const w = factors.weekday[dateObj.getDay()].factor;
-    const m = predictionMonthCycleAdjustment(dateObj) * factors.month[seasonalBucketIndex(dateObj.getDate())].factor;
-    const h = bankHolidayDates.has(isoDate) ? factors.holiday.factor : 1;
-    return { w, m, h, total: Math.max(0.05, w * m * h) };
+// "d7" for the 7th, or "e0".."e4" for the last five days of the month (so 28/30/31-day months line up at the end).
+function seasonalDayKey(dateObj) {
+    const d = dateObj.getDate(), dim = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
+    return d > dim - 5 ? "e" + (dim - d) : "d" + d;
 }
 
-function seasonalMetric(history, targetDate, metric, windowDays) {
+// Dates that follow a saved bank holiday (rebuilt whenever the holiday list changes).
+let seasonalPostHolidayCache = { source: null, dates: new Set() };
+function seasonalPostHolidayDates() {
+    if (seasonalPostHolidayCache.source !== bankHolidayDates) {
+        const dates = new Set();
+        bankHolidayDates.forEach(iso => { const next = predictionDate(iso); next.setDate(next.getDate() + 1); dates.add(dateToIsoLocal(next)); });
+        seasonalPostHolidayCache = { source: bankHolidayDates, dates };
+    }
+    return seasonalPostHolidayCache.dates;
+}
+function seasonalIsPostHoliday(dateObj, isoDate = dateToIsoLocal(dateObj)) {
+    return seasonalPostHolidayDates().has(isoDate) && !bankHolidayDates.has(isoDate);
+}
+
+// Fixed calendar facts per date (weekday, month, phase bucket, month-cycle prior, day key), computed once.
+const seasonalDateInfoCache = new Map();
+function seasonalDateInfo(isoDate, dateObj) {
+    let info = seasonalDateInfoCache.get(isoDate);
+    if (!info) {
+        const date = dateObj || predictionDate(isoDate);
+        info = { dow: date.getDay(), month: date.getMonth(), bucket: seasonalBucketIndex(date.getDate()), cycle: predictionMonthCycleAdjustment(date), dayKey: seasonalDayKey(date) };
+        seasonalDateInfoCache.set(isoDate, info);
+    }
+    return info;
+}
+
+// Month of year (Jan..Dec), learned from every loaded year by ratio-to-moving-average:
+// each month's daily average vs the 12 months around it (removes growth), then the median per calendar month.
+// Only months whose whole ±6-month neighbourhood ends before the target month are used, so nothing from the future leaks in.
+// Needs about 1.5 years of data before any month gets a learned value; until then every month is 1.
+function seasonalYearFactors(metric, targetDate) {
+    const targetIndex = targetDate.getFullYear() * 12 + targetDate.getMonth();
+    const last = currentRows[currentRows.length - 1];
+    const cacheKey = metric + "|" + targetIndex + "|" + currentRows.length + "|" + (last ? last.date : "");
+    if (seasonalYearCache.has(cacheKey)) return seasonalYearCache.get(cacheKey);
+    const months = new Map();
+    currentRows.forEach(row => {
+        const index = Number(row.date.slice(0, 4)) * 12 + Number(row.date.slice(5, 7)) - 1;
+        const entry = months.get(index) || { sum: 0, days: 0 };
+        entry.sum += metricValue(row, metric);
+        entry.days++;
+        months.set(index, entry);
+    });
+    const dailyMean = index => { const entry = months.get(index); return entry && entry.days >= 20 ? entry.sum / entry.days : null; };
+    const ratios = Array.from({ length: 12 }, () => []);
+    months.forEach((_, index) => {
+        if (index + 6 >= targetIndex) return;
+        const value = dailyMean(index);
+        if (!value) return;
+        const around = [];
+        for (let j = index - 6; j <= index + 6; j++) { if (j === index) continue; const v = dailyMean(j); if (v) around.push(v); }
+        if (around.length >= 10) ratios[index % 12].push(value / predictionMean(around));
+    });
+    const factors = ratios.map(r => ({ factor: predictionClamp(seasonalShrink(r, 1, PREDICTION_CONFIG.YEAR_PRIOR_STRENGTH), 0.75, 1.3), samples: r.length }));
+    seasonalYearCache.set(cacheKey, factors);
+    return factors;
+}
+
+function seasonalCalendarFactor(factors, dateObj, isoDate, yearFactors) {
+    const info = seasonalDateInfo(isoDate, dateObj);
+    const w = factors.weekday[info.dow].factor;
+    const dayInfo = factors.day.get(info.dayKey);
+    const m = info.cycle * factors.month[info.bucket].factor * (dayInfo ? dayInfo.factor : 1);
+    const holidayToday = bankHolidayDates.has(isoDate);
+    const post = !holidayToday && seasonalPostHolidayDates().has(isoDate);
+    const h = holidayToday ? factors.holiday.factor : post ? factors.postHoliday.factor : 1;
+    const y = yearFactors ? yearFactors[info.month].factor : 1;
+    return { w, m, h, y, post, total: Math.max(0.05, w * m * h * y) };
+}
+
+// Straight-line trend through calendar-adjusted values (robust: outliers dropped first). Returns growth per day as a share of the level.
+function seasonalLearnedSlope(points) {
+    if (points.length < 28) return 0;
+    const clean = predictionRobustRows(points, point => point.value);
+    const mx = predictionMean(clean.map(point => point.x)), my = predictionMean(clean.map(point => point.value));
+    let sxy = 0, sxx = 0;
+    clean.forEach(point => { sxy += (point.x - mx) * (point.value - my); sxx += (point.x - mx) ** 2; });
+    return sxx && my > 0 ? predictionClamp(sxy / sxx / my, -0.01, 0.01) : 0;
+}
+
+// Removes every learned calendar effect (weekday, phase + exact date, holiday / day-after, month of year) to get the
+// underlying daily level, projects that level forward with either short-term momentum or the learned trend line,
+// then re-applies the calendar effects of the target date. horizon > 1 is used for days further ahead (month-end projection).
+function seasonalMetric(history, targetDate, metric, windowDays, trendMode = "momentum") {
+    if (!history.length) return null;
     const factors = seasonalLearnFactors(history, metric);
-    const cutoff = new Date(targetDate);
+    const year = seasonalYearFactors(metric, targetDate);
+    // Adjusted values depend only on this history and these factors, so they are computed once and reused.
+    if (!factors.adjusted) factors.adjusted = new Map();
+    let cache = factors.adjusted.get(year);
+    if (!cache) {
+        cache = { values: new Map(), slopes: new Map() };
+        history.forEach(row => cache.values.set(row.date, metricValue(row, metric) / seasonalCalendarFactor(factors, row.dateObj, row.date, year).total));
+        factors.adjusted.set(year, cache);
+    }
+    const adjust = row => cache.values.has(row.date) ? cache.values.get(row.date) : metricValue(row, metric) / seasonalCalendarFactor(factors, row.dateObj, row.date, year).total;
+    const lastDate = history[history.length - 1].dateObj;
+    const anchor = new Date(lastDate);
+    anchor.setDate(anchor.getDate() + 1);
+    if (anchor > targetDate) anchor.setTime(targetDate.getTime());
+    const horizon = Math.max(1, predictionDaysBetween(lastDate, targetDate));
+    const cutoff = new Date(anchor);
     cutoff.setDate(cutoff.getDate() - windowDays);
 
     const adjusted = history
-        .filter(row => row.dateObj >= cutoff && row.dateObj < targetDate)
-        .map(row => ({
-            dateObj: row.dateObj,
-            value: metricValue(row, metric) / seasonalCalendarFactor(factors, row.dateObj, row.date).total
-        }));
+        .filter(row => row.dateObj >= cutoff && row.dateObj < anchor)
+        .map(row => ({ dateObj: row.dateObj, value: adjust(row) }));
 
     if (!adjusted.length) return null;
 
     const clean = predictionRobustRows(adjusted, row => row.value);
-    const weighted = predictionWeightedAverage(clean, targetDate, row => row.value, PREDICTION_CONFIG.RECENT_HALF_LIFE);
+    const weighted = predictionWeightedAverage(clean, anchor, row => row.value, PREDICTION_CONFIG.RECENT_HALF_LIFE);
     const median = predictionMedian(clean.slice(-14).map(row => row.value));
     const level = weighted * 0.70 + median * 0.30;
-    const trend = predictionTrend(clean, row => row.value);
-    const trendAdjustment = 1 + (trend - 1) * 0.35;
-    const calendar = seasonalCalendarFactor(factors, targetDate, dateToIsoLocal(targetDate));
 
-    return { value: level * trendAdjustment * calendar.total, level, trend, trendAdjustment, calendar, factors };
+    // Short-term momentum: last 7 vs previous 7 days, a third carried forward.
+    const trend = predictionTrend(clean, row => row.value);
+    const momentumAdjustment = 1 + (trend - 1) * 0.35;
+
+    // Learned trend: slope of the last 12 weeks, applied over the gap between where the level is measured and the target.
+    const trendFrom = new Date(anchor);
+    trendFrom.setDate(trendFrom.getDate() - PREDICTION_CONFIG.TREND_LOOKBACK_DAYS);
+    const slopeKey = anchor.getTime();
+    if (!cache.slopes.has(slopeKey)) {
+        cache.slopes.set(slopeKey, seasonalLearnedSlope(history
+            .filter(row => row.dateObj >= trendFrom && row.dateObj < anchor)
+            .map(row => ({ x: -predictionDaysBetween(row.dateObj, anchor), value: adjust(row) }))));
+    }
+    const slope = cache.slopes.get(slopeKey);
+    let weightSum = 0, ageSum = 0;
+    clean.forEach(row => { const age = predictionDaysBetween(row.dateObj, anchor); const w = Math.pow(0.5, age / PREDICTION_CONFIG.RECENT_HALF_LIFE); weightSum += w; ageSum += w * age; });
+    const levelAge = (weightSum ? ageSum / weightSum : 7) * 0.7 + 7 * 0.3;
+    const cap = PREDICTION_CONFIG.MAX_TREND_EFFECT;
+    const learnedAdjustment = 1 + predictionClamp(slope * (levelAge + horizon - 1) * PREDICTION_CONFIG.TREND_DAMPING, -cap, cap);
+
+    const calendar = seasonalCalendarFactor(factors, targetDate, dateToIsoLocal(targetDate), year);
+    const trendAdjustment = trendMode === "learned" ? learnedAdjustment : momentumAdjustment;
+    return {
+        value: level * trendAdjustment * calendar.total,
+        momentum: level * momentumAdjustment * calendar.total,
+        learned: level * learnedAdjustment * calendar.total,
+        level, trend, trendAdjustment, momentumAdjustment, learnedAdjustment, slope, horizon, calendar, factors, year, trendMode
+    };
 }
 
 function predictionBiasFactor(results) {
@@ -2537,7 +2753,7 @@ function predictionScore(results, predict) {
     return { wape, bias, score: wape + Math.abs(bias) * 0.35 };
 }
 
-function forecastPredictionDay(history, targetDate, windowDays) {
+function forecastPredictionDay(history, targetDate, windowDays, trendMode = "momentum") {
     const directAmount = predictionMetric(
         history,
         targetDate,
@@ -2566,12 +2782,13 @@ function forecastPredictionDay(history, targetDate, windowDays) {
         directAmount * PREDICTION_CONFIG.DIRECT_AMOUNT_WEIGHT +
         countTicketAmount * PREDICTION_CONFIG.COUNT_TICKET_WEIGHT;
 
-    const seasonalAmountPart = seasonalMetric(history, targetDate, "successAmount", windowDays);
-    const seasonalCountPart = seasonalMetric(history, targetDate, "successCount", windowDays);
-    const seasonalAmount = seasonalAmountPart && seasonalCountPart
-        ? seasonalAmountPart.value * PREDICTION_CONFIG.DIRECT_AMOUNT_WEIGHT +
-          seasonalCountPart.value * amountPerSuccess * PREDICTION_CONFIG.COUNT_TICKET_WEIGHT
+    const seasonalAmountPart = seasonalMetric(history, targetDate, "successAmount", windowDays, trendMode);
+    const seasonalCountPart = seasonalMetric(history, targetDate, "successCount", windowDays, trendMode);
+    const seasonalFor = mode => seasonalAmountPart && seasonalCountPart
+        ? seasonalAmountPart[mode] * PREDICTION_CONFIG.DIRECT_AMOUNT_WEIGHT +
+          seasonalCountPart[mode] * amountPerSuccess * PREDICTION_CONFIG.COUNT_TICKET_WEIGHT
         : finalAmount;
+    const seasonalAmount = seasonalFor(trendMode);
 
     return {
         directAmount,
@@ -2581,6 +2798,7 @@ function forecastPredictionDay(history, targetDate, windowDays) {
         finalAmount,
         legacyAmount: finalAmount,
         seasonalAmount,
+        seasonalByMode: { momentum: seasonalFor("momentum"), learned: seasonalFor("learned") },
         seasonalCount: seasonalCountPart ? seasonalCountPart.value : successCount,
         seasonal: seasonalAmountPart
     };
@@ -2589,18 +2807,20 @@ function forecastPredictionDay(history, targetDate, windowDays) {
 function predictionBacktestWindow(rows, windowDays) {
     const raw = [];
 
-    for (let i = PREDICTION_CONFIG.MIN_TRAINING_DAYS; i < rows.length; i++) {
+    const firstTarget = Math.max(PREDICTION_CONFIG.MIN_TRAINING_DAYS, rows.length - PREDICTION_CONFIG.BACKTEST_MAX_TARGETS);
+    for (let i = firstTarget; i < rows.length; i++) {
         const target = rows[i];
-        const history = rows.slice(0, i);
+        const history = rows.slice(Math.max(0, i - PREDICTION_CONFIG.BACKTEST_HISTORY_ROWS), i);
         const forecast = forecastPredictionDay(history, target.dateObj, windowDays);
 
-        if (forecast.legacyAmount <= 0 || forecast.seasonalAmount <= 0 || target.successAmount <= 0) continue;
+        if (forecast.legacyAmount <= 0 || forecast.seasonalByMode.momentum <= 0 || forecast.seasonalByMode.learned <= 0 || target.successAmount <= 0) continue;
 
         raw.push({
             date: target.date,
             actual: target.successAmount,
             legacy: forecast.legacyAmount,
-            seasonal: forecast.seasonalAmount
+            momentum: forecast.seasonalByMode.momentum,
+            learned: forecast.seasonalByMode.learned
         });
     }
 
@@ -2608,6 +2828,7 @@ function predictionBacktestWindow(rows, windowDays) {
         return {
             windowDays,
             blendWeight: 0,
+            trendMode: "momentum",
             useBiasCorrection: false,
             score: Infinity,
             wape: Infinity,
@@ -2616,14 +2837,15 @@ function predictionBacktestWindow(rows, windowDays) {
         };
     }
 
+    // The backtest picks both the trend method (momentum or learned trend line) and the model mix.
     let best = null;
-    PREDICTION_CONFIG.BLEND_WEIGHTS.forEach(weight => {
-        const scored = predictionScore(raw, row => row.legacy * (1 - weight) + row.seasonal * weight);
-        if (!best || scored.score < best.score) best = { ...scored, blendWeight: weight };
-    });
+    ["momentum", "learned"].forEach(trendMode => PREDICTION_CONFIG.BLEND_WEIGHTS.forEach(weight => {
+        const scored = predictionScore(raw, row => row.legacy * (1 - weight) + row[trendMode] * weight);
+        if (!best || scored.score < best.score) best = { ...scored, blendWeight: weight, trendMode };
+    }));
 
     const results = raw.map(row => {
-        const predicted = row.legacy * (1 - best.blendWeight) + row.seasonal * best.blendWeight;
+        const predicted = row.legacy * (1 - best.blendWeight) + row[best.trendMode] * best.blendWeight;
         const error = predicted - row.actual;
         const absoluteError = Math.abs(error);
         return {
@@ -2646,6 +2868,7 @@ function predictionBacktestWindow(rows, windowDays) {
     return {
         windowDays,
         blendWeight: best.blendWeight,
+        trendMode: best.trendMode,
         useBiasCorrection,
         score: best.score,
         wape: best.wape,
@@ -2661,6 +2884,7 @@ function buildPredictionReasons(info) {
     const seasonal = forecast.seasonal;
     const reasons = [];
 
+    reasons.push(`Trend method: ${best.trendMode === "learned" ? "learned 12-week trend line" : "short-term momentum"}, chosen because it scored better in backtests.`);
     reasons.push(`Learned from the last ${best.windowDays} days of history (up to ${completed[completed.length - 1].date}). This window had the smallest past error (${formatPredictionPercent(best.wape)} WAPE) of the ${tests.length} tested.`);
 
     if (seasonal) {
@@ -2669,17 +2893,35 @@ function buildPredictionReasons(info) {
         const monthInfo = seasonal.factors.month[bucketIndex];
         const trendChange = seasonal.trend - 1;
 
-        reasons.push(`After removing weekday and month-cycle effects, a normal day is currently worth about ${formatPredictionMoney(seasonal.level)}.`);
+        reasons.push(`After removing weekday, date-of-month, month-of-year and holiday effects, a normal day is currently worth about ${formatPredictionMoney(seasonal.level)}.`);
         reasons.push(`${weekdayName}s usually do ${pct(seasonal.calendar.w)} of an average day` +
             (weekdayInfo.samples ? ` (based on ${weekdayInfo.samples} past ${weekdayName}s).` : " (default pattern, not enough history yet)."));
         reasons.push(`Day ${targetDateObj.getDate()} falls in the ${SEASONAL_MONTH_BUCKETS[bucketIndex].label} phase, which typically runs at ${pct(seasonal.calendar.m)} of normal` +
             (monthInfo.samples ? ` (tuned with ${monthInfo.samples} past days).` : " (default pattern, not enough history to tune it yet)."));
-        if (seasonal.calendar.h !== 1) {
-            reasons.push(`It is a saved bank holiday, so volume is expected at ${pct(seasonal.calendar.h)} of a regular ${weekdayName}.`);
+        const monthName = targetDateObj.toLocaleDateString("en-IN", { month: "long" });
+        const yearInfo = seasonal.year[targetDateObj.getMonth()];
+        if (yearInfo.samples) {
+            reasons.push(`${monthName} usually runs at ${pct(yearInfo.factor)} of a typical month (learned from ${yearInfo.samples} past ${monthName}${yearInfo.samples === 1 ? "" : "s"}, with growth removed).`);
+        } else {
+            reasons.push(`Month-of-year pattern for ${monthName} is not learned yet; it needs about 1.5 years of data.`);
         }
-        reasons.push(Math.abs(trendChange) < 0.02
-            ? "Volume has been flat week over week, so no trend adjustment was applied."
-            : `The last 7 days are ${trendChange > 0 ? "up" : "down"} ${pct(Math.abs(trendChange))} vs the week before; about a third of that momentum is carried forward.`);
+        if (bankHolidayDates.has(target.date)) {
+            reasons.push(`It is a saved bank holiday, so volume is expected at ${pct(seasonal.calendar.h)} of a regular ${weekdayName}` +
+                (seasonal.factors.holiday.samples ? ` (learned from ${seasonal.factors.holiday.samples} past holidays).` : " (default, no past holidays in the data yet)."));
+        } else if (seasonal.calendar.post) {
+            reasons.push(`It is the day after a bank holiday, which usually runs at ${pct(seasonal.calendar.h)} of a regular ${weekdayName}` +
+                (seasonal.factors.postHoliday.samples ? ` (catch-up learned from ${seasonal.factors.postHoliday.samples} past cases).` : " (no past cases to learn from yet)."));
+        }
+        if (best.trendMode === "learned") {
+            const perMonth = seasonal.slope * 30;
+            reasons.push(Math.abs(perMonth) < 0.005
+                ? "The learned 12-week trend is flat, so no growth adjustment was applied."
+                : `The learned 12-week trend is ${perMonth > 0 ? "growth" : "decline"} of about ${(Math.abs(perMonth) * 100).toFixed(1)}% a month; the forecast is moved ${seasonal.learnedAdjustment >= 1 ? "up" : "down"} ${pct(Math.abs(seasonal.learnedAdjustment - 1))} for it.`);
+        } else {
+            reasons.push(Math.abs(trendChange) < 0.02
+                ? "Volume has been flat week over week, so no trend adjustment was applied."
+                : `The last 7 days are ${trendChange > 0 ? "up" : "down"} ${pct(Math.abs(trendChange))} vs the week before; about a third of that momentum is carried forward.`);
+        }
     }
 
     const weight = best.blendWeight;
@@ -2762,58 +3004,66 @@ function buildAllMetricProjections(history, targetDate, windowDays, successBasel
     projected.txnAmount = projected.successAmount + projected.failedAmount;
     return projected;
 }
-function projectionDatasetStyle(metric) {
-    return { txnCount:{borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,0.16)"}, txnAmount:{borderColor:"#9333ea",backgroundColor:"rgba(147,51,234,0.14)"}, successCount:{borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,0.16)"}, successAmount:{borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,0.14)"}, failedCount:{borderColor:"#dc2626",backgroundColor:"rgba(220,38,38,0.14)"}, failedAmount:{borderColor:"#f97316",backgroundColor:"rgba(249,115,22,0.14)"} }[metric];
+// Same-weekday trend: one metric, recent weeks only, forecast shown as a dashed step to the target date.
+const WEEKDAY_CHART_KEY = "transaction-dashboard-weekday-chart";
+function restoreWeekdayChartSettings() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(WEEKDAY_CHART_KEY) || "null"); } catch (_) {}
+    if (!saved) return;
+    const metric = document.getElementById("weekdayMetric"), weeks = document.getElementById("weekdayWeeks");
+    if ([...metric.options].some(o => o.value === saved.metric)) metric.value = saved.metric;
+    if ([...weeks.options].some(o => o.value === String(saved.weeks))) weeks.value = String(saved.weeks);
 }
-function updateDropdownTextFlexible(elementId, emptyText) {
-    const dropdown = document.getElementById(elementId); if (!dropdown) return;
-    const button = dropdown.querySelector(".multi-select-button");
-    const enabled = Array.from(dropdown.querySelectorAll('input[type="checkbox"]')).filter(input => !input.disabled);
-    const selected = enabled.filter(input => input.checked);
-    if (!selected.length) button.textContent = emptyText;
-    else if (selected.length === enabled.length && enabled.length > 0) button.textContent = "All Available Selected";
-    else button.textContent = `${selected.length} Selected`;
+function handleWeekdayChartChange() {
+    try { localStorage.setItem(WEEKDAY_CHART_KEY, JSON.stringify({ metric: document.getElementById("weekdayMetric").value, weeks: document.getElementById("weekdayWeeks").value })); } catch (_) {}
+    updateWeekdayHistoryChart();
 }
-function syncProjectionOptions() {
-    const selectedHistorical = new Set(getSelectedMetrics("weekdayMetricSelect"));
-    document.querySelectorAll('#weekdayProjectionSelect input[type="checkbox"]').forEach(input => {
-        const enabled = selectedHistorical.has(input.value);
-        input.disabled = !enabled;
-        input.closest(".multi-select-option").classList.toggle("disabled-option", !enabled);
-        if (!enabled) input.checked = false;
-    });
-    updateDropdownTextFlexible("weekdayMetricSelect", "Select Metrics");
-    updateDropdownTextFlexible("weekdayProjectionSelect", "Select Projections");
-}
-function handleWeekdayMetricChange() { syncProjectionOptions(); updateWeekdayHistoryChart(); }
 function createWeekdayHistoryChart() {
     if (!latestPredictionContext) return;
-    const target = latestPredictionContext.target;
-    const historical = latestPredictionContext.completed.filter(row => row.dateObj.getDay() === target.dateObj.getDay());
-    document.getElementById("weekdayHistoryTitle").textContent = `${getDayOfWeek(target.date)} Historical Trend`;
-    document.getElementById("weekdayHistoryNote").textContent = `Historical ${getDayOfWeek(target.date)} records before ${target.date}, plus the selected-date projection.`;
-    syncProjectionOptions();
-    const labels = [...historical.map(row => row.date), `${target.date} (Projected)`];
-    const selectedMetrics = getSelectedMetrics("weekdayMetricSelect");
-    const selectedProjections = getSelectedMetrics("weekdayProjectionSelect");
-    const datasets = [];
-    selectedMetrics.forEach(metric => {
-        const style = projectionDatasetStyle(metric);
-        const actualData = historical.map(row => metricValue(row, metric));
-        actualData.push(null);
-        datasets.push({ label:metricLabel(metric)+" - Historical", data:actualData, yAxisID:metricIsAmount(metric)?"amountAxis":"countAxis", borderColor:style.borderColor, backgroundColor:style.backgroundColor, borderWidth:2, fill:true, tension:0.3, pointRadius:4, spanGaps:false });
-        if (selectedProjections.includes(metric)) {
-            const projectionData = new Array(labels.length).fill(null);
-            if (historical.length) projectionData[historical.length-1] = metricValue(historical[historical.length-1], metric);
-            projectionData[labels.length-1] = latestPredictionContext.metricProjections[metric];
-            datasets.push({ label:metricLabel(metric)+" - Selected Date Projection", data:projectionData, yAxisID:metricIsAmount(metric)?"amountAxis":"countAxis", borderColor:style.borderColor, backgroundColor:"transparent", borderWidth:3, borderDash:[8,6], fill:false, tension:0, pointRadius:5, pointStyle:"rectRot", spanGaps:true });
+    const { target, completed, metricProjections, lower, upper } = latestPredictionContext;
+    const metric = document.getElementById("weekdayMetric").value || "successAmount";
+    const weeks = Number(document.getElementById("weekdayWeeks").value);
+    const dayName = getDayOfWeek(target.date);
+    let historical = completed.filter(row => row.dateObj.getDay() === target.dateObj.getDay());
+    if (weeks) historical = historical.slice(-weeks);
+    const values = historical.map(row => metricValue(row, metric));
+    const projected = metricProjections[metric];
+    const avg = values.length ? predictionMean(values) : null;
+    const dates = [...historical.map(row => row.date), target.date];
+    const short = iso => anDayLabel(iso, anSpansYears(dates));
+    const last = dates.length - 1;
+    const labels = dates.map((iso, i) => i === last ? short(iso) + " (forecast)" : short(iso));
+    const p = anPalette(), forecastColor = "#ff6b00";
+    const change = anChange(projected, avg, metric);
+
+    document.getElementById("weekdayHistoryTitle").textContent = dayName + "s · " + metricLabel(metric);
+    document.getElementById("weekdayHistoryNote").textContent = "Each point is one " + dayName + ". Orange = forecast for " + target.date +
+        (change ? " (" + anChangeText(change) + " vs the average of the " + values.length + " shown)" : "") + ". Grey dashed = that average.";
+
+    const datasets = [
+        { label: "Past " + dayName + "s", data: [...values, null], borderColor: p.accent, backgroundColor: p.accent, borderWidth: 2.4, pointRadius: 3, pointHoverRadius: 5, tension: 0.25, order: 2 },
+        { label: "Forecast", data: labels.map((_, i) => i === last ? projected : i === last - 1 ? values[values.length - 1] : null), borderColor: forecastColor, backgroundColor: forecastColor, borderWidth: 2.4, borderDash: [6, 5], pointRadius: labels.map((_, i) => i === last ? 6 : 0), pointHoverRadius: labels.map((_, i) => i === last ? 7 : 0), spanGaps: true, order: 1 },
+        { label: "Average", data: labels.map(() => avg), borderColor: p.neutral, backgroundColor: p.neutral, borderDash: [4, 4], borderWidth: 1.4, pointRadius: 0, pointHoverRadius: 0, order: 3 }
+    ];
+    const options = anOptions(p, { key: metric });
+    options.animation = { duration: 400 };
+    options.scales.y.beginAtZero = false;
+    options.plugins.legend.labels.sort = (a, b) => a.datasetIndex - b.datasetIndex;
+    options.plugins.tooltip.filter = item => item.raw !== null && item.datasetIndex !== 2 && !(item.datasetIndex === 1 && item.dataIndex !== last);
+    options.plugins.tooltip.callbacks = {
+        title: items => dates[items[0].dataIndex] + " · " + dayName,
+        label: ctx => ctx.dataset.label + ": " + anFmt(ctx.raw, metric, true),
+        footer: items => {
+            const i = items[0].dataIndex;
+            const lines = [];
+            if (i === last && metric === "successAmount") lines.push("Likely range: " + anFmt(lower, metric, true) + " – " + anFmt(upper, metric, true));
+            const c = anChange(i === last ? projected : values[i], avg, metric);
+            if (c) lines.push(anChangeText(c) + " vs average " + dayName);
+            return lines;
         }
-    });
+    };
     if (weekdayHistoryChart) weekdayHistoryChart.destroy();
-    const ctx = document.getElementById("weekdayHistoryChart").getContext("2d");
-    weekdayHistoryChart = new Chart(ctx, { type:"line", data:{labels,datasets}, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, plugins:{ legend:{position:"top",labels:{usePointStyle:true,padding:16}}, tooltip:{ backgroundColor:"rgba(17,24,39,0.96)", padding:14, callbacks:{ label:function(context){ const value=context.raw; if(value==null) return null; const isAmount=context.dataset.yAxisID==="amountAxis"; return context.dataset.label+": "+(isAmount?"₹"+formatNumber(Math.round(value)):formatNumber(Math.round(value))); } } } }, scales:{ x:{title:{display:true,text:getDayOfWeek(target.date)+" Date"},grid:{display:false},ticks:{maxRotation:45,minRotation:45}}, countAxis:{type:"linear",position:"left",beginAtZero:true,title:{display:true,text:"Transaction Count"},ticks:{callback:value=>formatNumber(value)},grid:{color:"rgba(0,0,0,0.06)"}}, amountAxis:{type:"linear",position:"right",beginAtZero:true,title:{display:true,text:"Transaction Amount"},ticks:{callback:value=>"₹"+formatNumber(value)},grid:{drawOnChartArea:false}} } } });
-    updateDropdownTextFlexible("weekdayMetricSelect", "Select Metrics");
-    updateDropdownTextFlexible("weekdayProjectionSelect", "Select Projections");
+    weekdayHistoryChart = new Chart(document.getElementById("weekdayHistoryChart").getContext("2d"), { type: "line", data: { labels, datasets }, options });
 }
 function updateWeekdayHistoryChart() { if (!latestPredictionContext || !currentRows.length) return; createWeekdayHistoryChart(); }
 
@@ -2860,6 +3110,7 @@ function generatePrediction() {
     }
 
     seasonalFactorCache = new Map();
+    seasonalYearCache = new Map();
     const tests = PREDICTION_CONFIG.WINDOW_OPTIONS
         .map(windowDays => predictionBacktestWindow(completed, windowDays))
         .filter(test => Number.isFinite(test.score))
@@ -2872,7 +3123,7 @@ function generatePrediction() {
     }
 
     const best = tests[0];
-    const forecast = forecastPredictionDay(completed, targetDateObj, best.windowDays);
+    const forecast = forecastPredictionDay(completed, targetDateObj, best.windowDays, best.trendMode);
     const blend = best.blendWeight;
     const biasFactor = best.useBiasCorrection ? predictionBiasFactor(best.results) : 1;
     const modelAmount = (forecast.legacyAmount * (1 - blend) + forecast.seasonalAmount * blend) * biasFactor;
@@ -2918,7 +3169,7 @@ function generatePrediction() {
     biasEl.textContent = formatPredictionPercent(best.bias);
     biasEl.className = "prediction-value " + (Math.abs(best.bias) <= 0.10 ? "model-good" : Math.abs(best.bias) <= 0.20 ? "model-warn" : "model-bad");
 
-    document.getElementById("predictionMethod").textContent = `Adaptive blend · ${Math.round(blend * 100)}% seasonal`;
+    document.getElementById("predictionMethod").textContent = `Adaptive blend · ${Math.round(blend * 100)}% seasonal · ${best.trendMode === "learned" ? "learned trend" : "momentum"}`;
     renderPredictionReasons(
         buildPredictionReasons({ target, targetDateObj, best, tests, forecast, biasFactor, isToday, targetRow, intervalError, completed }),
         `${formatPredictionMoney(finalAmount)} for ${getDayOfWeek(target.date)}, ${target.date}`
@@ -2932,7 +3183,7 @@ function generatePrediction() {
             <td>${test.windowDays} days${index === 0 ? " ✓" : ""}</td>
             <td class="${predictionQualityClass(test.wape)}">${formatPredictionPercent(test.wape)}</td>
             <td>${formatPredictionPercent(test.bias)}</td>
-            <td>${Math.round(test.blendWeight * 100)}%${test.useBiasCorrection ? " + bias fix" : ""}</td>
+            <td>${Math.round(test.blendWeight * 100)}% · ${test.trendMode === "learned" ? "trend line" : "momentum"}${test.useBiasCorrection ? " + bias fix" : ""}</td>
             <td>${formatPredictionPercent(test.score)}</td>
         </tr>
     `).join("");
@@ -3226,45 +3477,49 @@ function updateOverallStats() {
     document.getElementById("totalFailedAmount").textContent = "₹" + formatNumber(totalFailedAmount);
     document.getElementById("totalTransactionCount").textContent = formatNumber(totalTransactionCount);
     document.getElementById("totalTransactionAmount").textContent = "₹" + formatNumber(totalTransactionAmount);
+    document.getElementById("lifetimeSuccessRate").textContent = totalTransactionCount ? (totalSuccessCount / totalTransactionCount * 100).toFixed(2) + "%" : "0%";
+    document.getElementById("lifetimeRange").textContent = currentRows.length
+        ? `${currentRows[0].date} → ${currentRows[currentRows.length - 1].date} · ${currentRows.length} days`
+        : "—";
 }
 
 function setupDateSlider() {
-    const startSlider = document.getElementById("startDateSlider");
-    const endSlider = document.getElementById("endDateSlider");
     const max = currentRows.length - 1;
-
-    startSlider.min = 0;
-    startSlider.max = max;
-    startSlider.value = selectedStartIndex;
-
-    endSlider.min = 0;
-    endSlider.max = max;
-    endSlider.value = selectedEndIndex;
-
+    ["startDateSlider", "endDateSlider"].forEach(id => { const slider = document.getElementById(id); slider.min = 0; slider.max = max; });
+    document.getElementById("startDateSlider").value = selectedStartIndex;
+    document.getElementById("endDateSlider").value = selectedEndIndex;
     document.getElementById("minDateLabel").textContent = currentRows[0].date;
     document.getElementById("maxDateLabel").textContent = currentRows[max].date;
-
+    const months = [...new Set(currentRows.map(row => row.date.slice(0, 7)))].reverse();
+    document.getElementById("explorerMonth").innerHTML = '<option value="">Custom range</option>' +
+        months.map(m => '<option value="' + m + '">' + AN_MONTHS[Number(m.slice(5)) - 1] + " " + m.slice(0, 4) + "</option>").join("");
     updateSliderVisuals();
+}
+
+// Month dropdown: moves both slider handles to the first and last loaded day of that month.
+function applyExplorerMonth(month) {
+    if (!month || !currentRows.length) return;
+    const start = currentRows.findIndex(row => row.date.startsWith(month));
+    if (start < 0) return;
+    let end = start;
+    while (end + 1 < currentRows.length && currentRows[end + 1].date.startsWith(month)) end++;
+    document.getElementById("startDateSlider").value = start;
+    document.getElementById("endDateSlider").value = end;
+    handleSliderChange("start");
+    document.getElementById("explorerMonth").value = month;
 }
 
 function handleSliderChange(type) {
     let start = Number(document.getElementById("startDateSlider").value);
     let end = Number(document.getElementById("endDateSlider").value);
-
     if (start > end) {
-        if (type === "start") {
-            start = end;
-            document.getElementById("startDateSlider").value = start;
-        } else {
-            end = start;
-            document.getElementById("endDateSlider").value = end;
-        }
+        if (type === "start") { start = end; document.getElementById("startDateSlider").value = start; }
+        else { end = start; document.getElementById("endDateSlider").value = end; }
     }
-
     selectedStartIndex = start;
     selectedEndIndex = end;
     markRangePreset(null);
-
+    document.getElementById("explorerMonth").value = "";
     updateSliderVisuals();
     updateSelectedRangeStats();
     updateTransactionChart();
@@ -3272,288 +3527,107 @@ function handleSliderChange(type) {
 }
 
 function updateSliderVisuals() {
-    if (!currentRows.length) {
-        return;
-    }
-
+    if (!currentRows.length) return;
     const max = currentRows.length - 1;
     const startPercent = max === 0 ? 0 : (selectedStartIndex / max) * 100;
     const endPercent = max === 0 ? 100 : (selectedEndIndex / max) * 100;
     const sliderRange = document.getElementById("sliderRange");
-
     sliderRange.style.left = startPercent + "%";
     sliderRange.style.width = endPercent - startPercent + "%";
-
-    const startDate = currentRows[selectedStartIndex].date;
-    const endDate = currentRows[selectedEndIndex].date;
-
-    document.getElementById("selectedStartDate").textContent = startDate;
-    document.getElementById("selectedEndDate").textContent = endDate;
-    document.getElementById("sliderRangeText").textContent = startDate === endDate ? startDate : `${startDate} → ${endDate}`;
+    const startDate = currentRows[selectedStartIndex].date, endDate = currentRows[selectedEndIndex].date;
+    const days = selectedEndIndex - selectedStartIndex + 1;
+    document.getElementById("sliderRangeText").textContent = (startDate === endDate ? startDate : startDate + " → " + endDate) + " · " + days + " day" + (days === 1 ? "" : "s");
 }
 
 function getSelectedRows() {
-    if (!currentRows.length) {
-        return [];
-    }
-
+    if (!currentRows.length) return [];
     return currentRows.slice(selectedStartIndex, selectedEndIndex + 1);
 }
 
 function updateSelectedRangeStats() {
     const rows = getSelectedRows();
-
-    if (!rows.length) {
-        document.getElementById("rangeSuccessCount").textContent = "0";
-        document.getElementById("rangeSuccessAmount").textContent = "₹0";
-        document.getElementById("rangeFailedCount").textContent = "0";
-        document.getElementById("rangeFailedAmount").textContent = "₹0";
-        document.getElementById("rangeTransactionCount").textContent = "0";
-        document.getElementById("rangeTransactionAmount").textContent = "₹0";
-        document.getElementById("rangeSuccessRate").textContent = "0%";
-        document.getElementById("rangeFailedRate").textContent = "0%";
-        document.getElementById("rangeCountDate").textContent = "No range selected";
-        document.getElementById("rangeAmountDate").textContent = "No range selected";
-        document.getElementById("rangeSuccessCountDate").textContent = "No range selected";
-        document.getElementById("rangeSuccessAmountDate").textContent = "No range selected";
-        document.getElementById("rangeFailedCountDate").textContent = "No range selected";
-        document.getElementById("rangeFailedAmountDate").textContent = "No range selected";
-        document.getElementById("rangeSuccessRateDate").textContent = "No range selected";
-        document.getElementById("rangeFailedRateDate").textContent = "No range selected";
-        return;
-    }
-
-    const successCount = rows.reduce((sum, row) => sum + row.successCount, 0);
-    const successAmount = rows.reduce((sum, row) => sum + row.successAmount, 0);
-    const failedCount = rows.reduce((sum, row) => sum + row.failedCount, 0);
-    const failedAmount = rows.reduce((sum, row) => sum + row.failedAmount, 0);
+    const sum = key => rows.reduce((total, row) => total + row[key], 0);
+    const successCount = sum("successCount"), successAmount = sum("successAmount");
+    const failedCount = sum("failedCount"), failedAmount = sum("failedAmount");
     const transactionCount = successCount + failedCount;
-    const transactionAmount = successAmount + failedAmount;
-    const successRate = transactionCount ? (successCount / transactionCount) * 100 : 0;
-    const failedRate = transactionCount ? (failedCount / transactionCount) * 100 : 0;
-
-    const startDate = rows[0].date;
-    const endDate = rows[rows.length - 1].date;
-    const dateText = startDate === endDate ? startDate : `${startDate} → ${endDate}`;
-
-    document.getElementById("rangeSuccessCount").textContent = formatNumber(successCount);
-    document.getElementById("rangeSuccessAmount").textContent = "₹" + formatNumber(successAmount);
-    document.getElementById("rangeFailedCount").textContent = formatNumber(failedCount);
-    document.getElementById("rangeFailedAmount").textContent = "₹" + formatNumber(failedAmount);
-    document.getElementById("rangeTransactionCount").textContent = formatNumber(transactionCount);
-    document.getElementById("rangeTransactionAmount").textContent = "₹" + formatNumber(transactionAmount);
-    document.getElementById("rangeSuccessRate").textContent = successRate.toFixed(2) + "%";
-    document.getElementById("rangeFailedRate").textContent = failedRate.toFixed(2) + "%";
-
-    document.getElementById("rangeSuccessCountDate").textContent = dateText;
-    document.getElementById("rangeSuccessAmountDate").textContent = dateText;
-    document.getElementById("rangeFailedCountDate").textContent = dateText;
-    document.getElementById("rangeFailedAmountDate").textContent = dateText;
-    document.getElementById("rangeCountDate").textContent = dateText;
-    document.getElementById("rangeAmountDate").textContent = dateText;
-    document.getElementById("rangeSuccessRateDate").textContent = dateText;
-    document.getElementById("rangeFailedRateDate").textContent = dateText;
+    const set = (id, text) => { document.getElementById(id).textContent = text; };
+    set("rangeSuccessAmount", "₹" + formatNumber(successAmount));
+    set("rangeSuccessCount", formatNumber(successCount));
+    set("rangeFailedAmount", "₹" + formatNumber(failedAmount));
+    set("rangeFailedCount", formatNumber(failedCount));
+    set("rangeTransactionAmount", "₹" + formatNumber(successAmount + failedAmount));
+    set("rangeTransactionCount", formatNumber(transactionCount));
+    set("rangeSuccessRate", transactionCount ? (successCount / transactionCount * 100).toFixed(2) + "%" : "0%");
+    set("rangeFailedRate", transactionCount ? (failedCount / transactionCount * 100).toFixed(2) + "%" : "0%");
 }
 
-function createTransactionChart() {
-    const rows = getSelectedRows();
-    const labels = rows.map(row => row.date);
+// Range Explorer charts: colour = outcome (violet total, green success, red failed), theme colours, compact axes.
+const EXPLORER_METRICS = {
+    successAmount: ["Success Amount", "amountAxis", "success", false],
+    failedAmount: ["Failed Amount", "amountAxis", "red", false],
+    successCount: ["Success Count", "countAxis", "success", true],
+    failedCount: ["Failed Count", "countAxis", "red", true],
+    txnCount: ["Total Count", "countAxis", "violet", true]
+};
 
-    if (chart) {
-        chart.destroy();
-    }
+function explorerValues(rows) {
+    const values = {};
+    Object.keys(EXPLORER_METRICS).forEach(metric => { values[metric] = rows.map(row => metricValue(row, metric)); });
+    return values;
+}
 
-    const ctx = document.getElementById("transactionChart").getContext("2d");
-
-    chart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels,
-            datasets: createTransactionDatasets(rows)
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: "index",
-                intersect: false
-            },
-            plugins: {
-                legend: {
-                    position: "top",
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                },
-                tooltip: {
-                    backgroundColor: "rgba(17, 24, 39, 0.96)",
-                    padding: 14,
-                    callbacks: {
-                        title: function(context) {
-                            const date = context[0].label;
-                            return ["Date: " + date, "Day: " + getDayOfWeek(date)];
-                        },
-                        label: function(context) {
-                            const value = context.raw;
-
-                            if (context.dataset.label === "Success Amount") {
-                                return "Success Amount: ₹" + formatNumber(value);
-                            }
-
-                            if (context.dataset.label === "Failed Amount") {
-                                return "Failed Amount: ₹" + formatNumber(value);
-                            }
-
-                            if (context.dataset.label === "Total Transaction Amount") {
-                                return "Total Transaction Amount: ₹" + formatNumber(value);
-                            }
-
-                            return context.dataset.label + ": " + formatNumber(value);
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "Date"
-                    },
-                    ticks: {
-                        maxTicksLimit: 20,
-                        maxRotation: 45,
-                        minRotation: 45
-                    },
-                    grid: {
-                        display: false
-                    }
-                },
-                countAxis: {
-                    type: "linear",
-                    position: "left",
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: "Transaction Count"
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return formatNumber(value);
-                        }
-                    },
-                    grid: {
-                        color: "rgba(0,0,0,0.06)"
-                    }
-                },
-                amountAxis: {
-                    type: "linear",
-                    position: "right",
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: "Transaction Amount"
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return "₹" + formatNumber(value);
-                        }
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                }
-            }
-        }
+function explorerDatasets(selectId, values, bar) {
+    const p = anPalette();
+    return getSelectedMetrics(selectId).filter(metric => EXPLORER_METRICS[metric]).map(metric => {
+        const [label, yAxisID, colorKey, isCount] = EXPLORER_METRICS[metric];
+        const color = p[colorKey];
+        return bar
+            ? { label, data: values[metric], yAxisID, backgroundColor: isCount ? anAlpha(color, 0.4) : color, borderRadius: 3, maxBarThickness: 22 }
+            : { label, data: values[metric], yAxisID, borderColor: color, backgroundColor: color, borderWidth: 2, borderDash: isCount ? [5, 4] : [], fill: false, tension: 0.3, pointRadius: 0, pointHoverRadius: 4 };
     });
 }
 
-function createTransactionDatasets(rows) {
-    const selectedMetrics = getSelectedMetrics("transactionSelect");
-    const datasets = [];
-
-    const txnCounts = rows.map(row => row.successCount + row.failedCount);
-    const successCounts = rows.map(row => row.successCount);
-    const successAmounts = rows.map(row => row.successAmount);
-    const failedCounts = rows.map(row => row.failedCount);
-    const failedAmounts = rows.map(row => row.failedAmount);
-
-    if (selectedMetrics.includes("txnCount")) {
-        datasets.push({
-            label: "Total Transaction Count",
-            data: txnCounts,
-            yAxisID: "countAxis",
-            borderColor: "#7c3aed",
-            backgroundColor: "rgba(124, 58, 237, 0.18)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2,
-            pointHoverRadius: 6
-        });
+function explorerOptions(datasets, { dates = false, title } = {}) {
+    const p = anPalette();
+    const uses = id => datasets.some(d => d.yAxisID === id);
+    const x = { grid: { display: false }, ticks: { color: p.text, maxRotation: 0, autoSkip: true } };
+    if (dates) {
+        x.ticks.maxTicksLimit = window.innerWidth < 640 ? 4 : 7;
+        x.ticks.callback = function (value) { return anDayLabel(this.getLabelForValue(value), anSpansYears(this.chart.data.labels)); };
     }
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+            legend: { position: "top", labels: { color: p.text, usePointStyle: true, boxWidth: 8, padding: 12 } },
+            tooltip: {
+                backgroundColor: p.tooltip, titleColor: "#f8fafc", bodyColor: "#f8fafc", padding: 12, cornerRadius: 10,
+                callbacks: {
+                    title: title || (items => items[0].label),
+                    label: ctx => ctx.dataset.label + ": " + (ctx.dataset.yAxisID === "amountAxis" ? "₹" : "") + formatNumber(Math.round(ctx.raw))
+                }
+            }
+        },
+        scales: {
+            x,
+            amountAxis: { display: uses("amountAxis"), position: "left", beginAtZero: true, ticks: { color: p.text, callback: v => "₹" + anCompact(v) }, grid: { color: p.grid }, border: { display: false } },
+            countAxis: { display: uses("countAxis"), position: "right", beginAtZero: true, ticks: { color: p.text, callback: v => anCompact(v) }, grid: { color: p.grid, drawOnChartArea: !uses("amountAxis") }, border: { display: false } }
+        }
+    };
+}
 
-    if (selectedMetrics.includes("successCount")) {
-        datasets.push({
-            label: "Success Count",
-            data: successCounts,
-            yAxisID: "countAxis",
-            borderColor: "#16a34a",
-            backgroundColor: "rgba(22, 163, 74, 0.20)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2,
-            pointHoverRadius: 6
-        });
-    }
+function transactionChartConfig() {
+    const rows = getSelectedRows();
+    const datasets = explorerDatasets("transactionSelect", explorerValues(rows), false);
+    return { labels: rows.map(row => row.date), datasets, options: explorerOptions(datasets, { dates: true, title: items => items[0].label + " · " + anWeekday(items[0].label) }) };
+}
 
-    if (selectedMetrics.includes("successAmount")) {
-        datasets.push({
-            label: "Success Amount",
-            data: successAmounts,
-            yAxisID: "amountAxis",
-            borderColor: "#2563eb",
-            backgroundColor: "rgba(37, 99, 235, 0.15)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2,
-            pointHoverRadius: 6
-        });
-    }
-
-    if (selectedMetrics.includes("failedCount")) {
-        datasets.push({
-            label: "Failed Count",
-            data: failedCounts,
-            yAxisID: "countAxis",
-            borderColor: "#dc2626",
-            backgroundColor: "rgba(220, 38, 38, 0.20)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2,
-            pointHoverRadius: 6
-        });
-    }
-
-    if (selectedMetrics.includes("failedAmount")) {
-        datasets.push({
-            label: "Failed Amount",
-            data: failedAmounts,
-            yAxisID: "amountAxis",
-            borderColor: "#f97316",
-            backgroundColor: "rgba(249, 115, 22, 0.15)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2,
-            pointHoverRadius: 6
-        });
-    }
-
-    return datasets;
+function createTransactionChart() {
+    const { labels, datasets, options } = transactionChartConfig();
+    if (chart) chart.destroy();
+    chart = new Chart(document.getElementById("transactionChart").getContext("2d"), { type: "line", data: { labels, datasets }, options });
+    updateDropdownText("transactionSelect");
 }
 
 function getTransactionTypeChartData() {
@@ -3578,78 +3652,83 @@ function getTransactionTypeChartData() {
     };
 }
 
+// Colour = transaction type, solid = amount, dashed = count. Theme colours, no fill, no point dots.
 function createTransactionTypeDatasets(values) {
-    const selected = getSelectedMetrics("transactionTypeSelect");
+    const p = anPalette();
+    const color = { total: p.violet, instant: p.blue, classic: anCss("--orange", "#cf8453") };
     const defs = {
-        totalCount: ["Total Count", "countAxis", "#7c3aed", "rgba(124,58,237,0.16)"],
-        totalAmount: ["Total Amount", "amountAxis", "#9333ea", "rgba(147,51,234,0.12)"],
-        instantCount: ["Instant Count", "countAxis", "#16a34a", "rgba(22,163,74,0.14)"],
-        instantAmount: ["Instant Amount", "amountAxis", "#2563eb", "rgba(37,99,235,0.11)"],
-        classicCount: ["Classic Count", "countAxis", "#dc2626", "rgba(220,38,38,0.12)"],
-        classicAmount: ["Classic Amount", "amountAxis", "#f97316", "rgba(249,115,22,0.10)"]
+        totalAmount: ["Total Amount", "amountAxis", "total", false],
+        instantAmount: ["Instant Amount", "amountAxis", "instant", false],
+        classicAmount: ["Classic Amount", "amountAxis", "classic", false],
+        totalCount: ["Total Count", "countAxis", "total", true],
+        instantCount: ["Instant Count", "countAxis", "instant", true],
+        classicCount: ["Classic Count", "countAxis", "classic", true]
     };
-    return selected.map(metric => {
-        const [label, yAxisID, borderColor, backgroundColor] = defs[metric];
-        return { label, data: values[metric], yAxisID, borderColor, backgroundColor, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 2, pointHoverRadius: 6 };
+    return getSelectedMetrics("transactionTypeSelect").map(metric => {
+        const [label, yAxisID, type, dashed] = defs[metric];
+        return { label, data: values[metric], yAxisID, borderColor: color[type], backgroundColor: color[type], borderWidth: type === "total" ? 2.4 : 1.8, borderDash: dashed ? [5, 4] : [], fill: false, tension: 0.3, pointRadius: 0, pointHoverRadius: 4 };
     });
+}
+
+function transactionTypeOptions(datasets, values) {
+    const p = anPalette();
+    const uses = id => datasets.some(d => d.yAxisID === id);
+    const share = (a, b) => a + b ? Math.round(a / (a + b) * 100) : null;
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+            legend: { position: "top", labels: { color: p.text, usePointStyle: true, boxWidth: 8, padding: 14 } },
+            tooltip: {
+                backgroundColor: p.tooltip, titleColor: "#f8fafc", bodyColor: "#f8fafc", footerColor: "#cbd5e1", padding: 12, cornerRadius: 10, footerFont: { weight: "normal" },
+                callbacks: {
+                    title: items => `${items[0].label} · ${anWeekday(items[0].label)}`,
+                    label: ctx => `${ctx.dataset.label}: ${ctx.dataset.yAxisID === "amountAxis" ? "₹" : ""}${formatNumber(Math.round(ctx.raw))}`,
+                    footer: items => {
+                        const i = items[0].dataIndex;
+                        const amt = share(values.instantAmount[i], values.classicAmount[i]);
+                        const cnt = share(values.instantCount[i], values.classicCount[i]);
+                        const lines = [];
+                        if (amt !== null) lines.push(`Amount split: Instant ${amt}% · Classic ${100 - amt}%`);
+                        if (cnt !== null) lines.push(`Count split: Instant ${cnt}% · Classic ${100 - cnt}%`);
+                        return lines;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: p.text, maxRotation: 0, autoSkip: true, maxTicksLimit: window.innerWidth < 640 ? 5 : 10, callback: function (value) { return anDayLabel(this.getLabelForValue(value), anSpansYears(this.chart.data.labels)); } }
+            },
+            amountAxis: { display: uses("amountAxis"), position: "left", beginAtZero: true, ticks: { color: p.text, callback: v => "₹" + anCompact(v) }, grid: { color: p.grid }, border: { display: false } },
+            countAxis: { display: uses("countAxis"), position: "right", beginAtZero: true, ticks: { color: p.text, callback: v => anCompact(v) }, grid: { color: p.grid, drawOnChartArea: !uses("amountAxis") }, border: { display: false } }
+        }
+    };
 }
 
 function createTransactionTypeChart() {
     const { labels, values } = getTransactionTypeChartData();
+    const datasets = createTransactionTypeDatasets(values);
     if (transactionTypeChart) transactionTypeChart.destroy();
-    const ctx = document.getElementById("transactionTypeChart").getContext("2d");
-    transactionTypeChart = new Chart(ctx, {
-        type: "line",
-        data: { labels, datasets: createTransactionTypeDatasets(values) },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
-            plugins: {
-                legend: { position: "top", labels: { usePointStyle: true, padding: 16 } },
-                tooltip: {
-                    backgroundColor: "rgba(17,24,39,0.96)",
-                    padding: 14,
-                    callbacks: {
-                        title: context => ["Date: " + context[0].label, "Day: " + getDayOfWeek(context[0].label)],
-                        label: context => context.dataset.yAxisID === "amountAxis" ? context.dataset.label + ": ₹" + formatNumber(context.raw) : context.dataset.label + ": " + formatNumber(context.raw)
-                    }
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: "Date" }, ticks: { maxTicksLimit: 20, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
-                countAxis: { type: "linear", position: "left", beginAtZero: true, title: { display: true, text: "Transaction Count" }, ticks: { callback: value => formatNumber(value) }, grid: { color: "rgba(0,0,0,0.06)" } },
-                amountAxis: { type: "linear", position: "right", beginAtZero: true, title: { display: true, text: "Transaction Amount" }, ticks: { callback: value => "₹" + formatNumber(value) }, grid: { drawOnChartArea: false } }
-            }
-        }
-    });
+    transactionTypeChart = new Chart(document.getElementById("transactionTypeChart").getContext("2d"), { type: "line", data: { labels, datasets }, options: transactionTypeOptions(datasets, values) });
     updateDropdownText("transactionTypeSelect");
 }
 
 function updateTransactionTypeChart() {
-    if (!transactionTypeChart) {
-        updateDropdownText("transactionTypeSelect");
-        return;
-    }
-    const { labels, values } = getTransactionTypeChartData();
-    transactionTypeChart.data.labels = labels;
-    transactionTypeChart.data.datasets = createTransactionTypeDatasets(values);
-    transactionTypeChart.update();
-    updateDropdownText("transactionTypeSelect");
+    if (transactionTypeChart) createTransactionTypeChart();
+    else updateDropdownText("transactionTypeSelect");
 }
 
 function updateTransactionChart() {
-    if (!chart || !currentRows.length) {
-        updateDropdownText("transactionSelect");
-        return;
+    if (chart && currentRows.length) {
+        const { labels, datasets, options } = transactionChartConfig();
+        chart.data.labels = labels;
+        chart.data.datasets = datasets;
+        chart.options = options;
+        chart.update();
     }
-
-    const rows = getSelectedRows();
-
-    chart.data.labels = rows.map(row => row.date);
-    chart.data.datasets = createTransactionDatasets(rows);
-    chart.update();
-
     updateDropdownText("transactionSelect");
 }
 
@@ -3661,306 +3740,32 @@ function getDayOfWeek(dateString) {
     });
 }
 
+const EXPLORER_WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function dayOfWeekChartConfig(rows) {
+    const groups = [1, 2, 3, 4, 5, 6, 0].map(day => rows.filter(row => predictionDate(row.date).getDay() === day));
+    const values = {};
+    Object.keys(EXPLORER_METRICS).forEach(metric => { values[metric] = groups.map(g => g.length ? predictionMean(g.map(row => metricValue(row, metric))) : 0); });
+    const datasets = explorerDatasets("dayOfWeekSelect", values, true);
+    const options = explorerOptions(datasets, { title: items => { const n = groups[items[0].dataIndex].length; return EXPLORER_WEEKDAYS[items[0].dataIndex] + " · average of " + n + " day" + (n === 1 ? "" : "s"); } });
+    return { labels: EXPLORER_WEEKDAYS.map(d => d.slice(0, 3)), datasets, options };
+}
+
 function generateDayOfWeekChart(rows) {
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    const dayData = {};
-
-    days.forEach(day => {
-        dayData[day] = {
-            days: 0,
-            txnCount: 0,
-            successCount: 0,
-            successAmount: 0,
-            failedCount: 0,
-            failedAmount: 0
-        };
-    });
-
-    rows.forEach(row => {
-        const day = getDayOfWeek(row.date);
-        const data = dayData[day];
-
-        if (!data) {
-            return;
-        }
-
-        data.days++;
-        data.successCount += row.successCount;
-        data.successAmount += row.successAmount;
-        data.failedCount += row.failedCount;
-        data.failedAmount += row.failedAmount;
-        data.txnCount += row.successCount + row.failedCount;
-    });
-
-    const txnCount = [];
-    const successCount = [];
-    const successAmount = [];
-    const failedCount = [];
-    const failedAmount = [];
-
-    days.forEach(day => {
-        const data = dayData[day];
-
-        txnCount.push(data.days ? data.txnCount / data.days : 0);
-        successCount.push(data.days ? data.successCount / data.days : 0);
-        successAmount.push(data.days ? data.successAmount / data.days : 0);
-        failedCount.push(data.days ? data.failedCount / data.days : 0);
-        failedAmount.push(data.days ? data.failedAmount / data.days : 0);
-    });
-
-    if (dayOfWeekChart) {
-        dayOfWeekChart.destroy();
-    }
-
-    const ctx = document.getElementById("dayOfWeekChart").getContext("2d");
-
-    dayOfWeekChart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: days,
-            datasets: createDayOfWeekDatasets({
-                txnCount,
-                successCount,
-                successAmount,
-                failedCount,
-                failedAmount
-            })
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: "index",
-                intersect: false
-            },
-            plugins: {
-                legend: {
-                    position: "top",
-                    labels: {
-                        usePointStyle: true,
-                        padding: 18
-                    }
-                },
-                tooltip: {
-                    backgroundColor: "rgba(17, 24, 39, 0.96)",
-                    padding: 14,
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].label;
-                        },
-                        beforeBody: function(context) {
-                            const day = context[0].label;
-                            const dayInfo = dayData[day];
-
-                            return "Based on " + dayInfo.days + " " + day.toLowerCase() + (dayInfo.days === 1 ? "" : "s");
-                        },
-                        label: function(context) {
-                            const value = context.raw;
-
-                            if (context.dataset.label.includes("Amount")) {
-                                return context.dataset.label + ": ₹" + formatNumber(Math.round(value));
-                            }
-
-                            return context.dataset.label + ": " + formatNumber(Math.round(value));
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "Day of Week"
-                    },
-                    grid: {
-                        display: false
-                    }
-                },
-                countAxis: {
-                    type: "linear",
-                    position: "left",
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: "Average Transaction Count"
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return formatNumber(value);
-                        }
-                    },
-                    grid: {
-                        color: "rgba(0,0,0,0.06)"
-                    }
-                },
-                amountAxis: {
-                    type: "linear",
-                    position: "right",
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: "Average Transaction Amount"
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return "₹" + formatNumber(value);
-                        }
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                }
-            }
-        }
-    });
-
+    const { labels, datasets, options } = dayOfWeekChartConfig(rows);
+    if (dayOfWeekChart) dayOfWeekChart.destroy();
+    dayOfWeekChart = new Chart(document.getElementById("dayOfWeekChart").getContext("2d"), { type: "bar", data: { labels, datasets }, options });
     updateDropdownText("dayOfWeekSelect");
 }
 
-function createDayOfWeekDatasets(data) {
-    const selectedMetrics = getSelectedMetrics("dayOfWeekSelect");
-    const datasets = [];
-
-    if (selectedMetrics.includes("txnCount")) {
-        datasets.push({
-            label: "Total Transaction Count",
-            data: data.txnCount,
-            yAxisID: "countAxis",
-            borderColor: "#7c3aed",
-            backgroundColor: "rgba(124, 58, 237, 0.18)",
-            borderWidth: 3,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 5,
-            pointHoverRadius: 8
-        });
-    }
-
-    if (selectedMetrics.includes("successCount")) {
-        datasets.push({
-            label: "Success Count",
-            data: data.successCount,
-            yAxisID: "countAxis",
-            borderColor: "#16a34a",
-            backgroundColor: "rgba(22, 163, 74, 0.12)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 4,
-            pointHoverRadius: 7
-        });
-    }
-
-    if (selectedMetrics.includes("failedCount")) {
-        datasets.push({
-            label: "Failed Count",
-            data: data.failedCount,
-            yAxisID: "countAxis",
-            borderColor: "#dc2626",
-            backgroundColor: "rgba(220, 38, 38, 0.12)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 4,
-            pointHoverRadius: 7
-        });
-    }
-
-    if (selectedMetrics.includes("successAmount")) {
-        datasets.push({
-            label: "Success Amount",
-            data: data.successAmount,
-            yAxisID: "amountAxis",
-            borderColor: "#2563eb",
-            backgroundColor: "rgba(37, 99, 235, 0.10)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 4,
-            pointHoverRadius: 7
-        });
-    }
-
-    if (selectedMetrics.includes("failedAmount")) {
-        datasets.push({
-            label: "Failed Amount",
-            data: data.failedAmount,
-            yAxisID: "amountAxis",
-            borderColor: "#f97316",
-            backgroundColor: "rgba(249, 115, 22, 0.10)",
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 4,
-            pointHoverRadius: 7
-        });
-    }
-
-    return datasets;
-}
-
 function updateDayOfWeekChart() {
-    if (!dayOfWeekChart || !currentRows.length) {
-        updateDropdownText("dayOfWeekSelect");
-        return;
+    if (dayOfWeekChart && currentRows.length) {
+        const { labels, datasets, options } = dayOfWeekChartConfig(getSelectedRows());
+        dayOfWeekChart.data.labels = labels;
+        dayOfWeekChart.data.datasets = datasets;
+        dayOfWeekChart.options = options;
+        dayOfWeekChart.update();
     }
-
-    const rows = getSelectedRows();
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    const dayData = {};
-
-    days.forEach(day => {
-        dayData[day] = {
-            days: 0,
-            txnCount: 0,
-            successCount: 0,
-            successAmount: 0,
-            failedCount: 0,
-            failedAmount: 0
-        };
-    });
-
-    rows.forEach(row => {
-        const day = getDayOfWeek(row.date);
-        const data = dayData[day];
-
-        if (!data) {
-            return;
-        }
-
-        data.days++;
-        data.successCount += row.successCount;
-        data.successAmount += row.successAmount;
-        data.failedCount += row.failedCount;
-        data.failedAmount += row.failedAmount;
-        data.txnCount += row.successCount + row.failedCount;
-    });
-
-    const txnCount = [];
-    const successCount = [];
-    const successAmount = [];
-    const failedCount = [];
-    const failedAmount = [];
-
-    days.forEach(day => {
-        const data = dayData[day];
-
-        txnCount.push(data.days ? data.txnCount / data.days : 0);
-        successCount.push(data.days ? data.successCount / data.days : 0);
-        successAmount.push(data.days ? data.successAmount / data.days : 0);
-        failedCount.push(data.days ? data.failedCount / data.days : 0);
-        failedAmount.push(data.days ? data.failedAmount / data.days : 0);
-    });
-
-    dayOfWeekChart.data.datasets = createDayOfWeekDatasets({
-        txnCount,
-        successCount,
-        successAmount,
-        failedCount,
-        failedAmount
-    });
-
-    dayOfWeekChart.update();
     updateDropdownText("dayOfWeekSelect");
 }
 
@@ -4157,12 +3962,10 @@ document.addEventListener("change", event => {
 window.addEventListener("load", async function() {
     document.getElementById("predictionTargetDate").value = localDateString();
     restoreDropdownSelections();
-    syncProjectionOptions();
+    restoreWeekdayChartSettings();
     updateDropdownText("transactionSelect");
     updateDropdownText("transactionTypeSelect");
     updateDropdownText("dayOfWeekSelect");
-    updateDropdownTextFlexible("weekdayMetricSelect", "Select Metrics");
-    updateDropdownTextFlexible("weekdayProjectionSelect", "Select Projections");
     try {
         await loadBankHolidays();
         const saved = await loadDashboardData();
@@ -4212,6 +4015,9 @@ function anSaveState() {
 
 function anPad(n) { return String(n).padStart(2, "0"); }
 function anIso(y, m, d) { return `${y}-${anPad(m)}-${anPad(d)}`; }
+// "16 Nov", or "16 Nov '25" when the dates on screen span more than one calendar year.
+function anDayLabel(iso, withYear = false) { return Number(iso.slice(8)) + " " + AN_MONTHS[Number(iso.slice(5, 7)) - 1] + (withYear ? " '" + iso.slice(2, 4) : ""); }
+function anSpansYears(isoList) { return isoList.length > 1 && isoList[0].slice(0, 4) !== isoList[isoList.length - 1].slice(0, 4); }
 function anShift(iso, days) { const date = predictionDate(iso); date.setDate(date.getDate() + days); return dateToIsoLocal(date); }
 function anWeekday(iso) { return AN_WEEKDAYS[predictionDate(iso).getDay()]; }
 function anCap(text) { return text.charAt(0).toUpperCase() + text.slice(1); }
@@ -4280,15 +4086,32 @@ function anChangeTone(change, key = analyticsState.metric) {
     return (ANALYTICS_METRICS[key].lowerIsBetter ? change.value < 0 : change.value > 0) ? "up" : "down";
 }
 
-function anDeltaFromChange(change, key = analyticsState.metric, context = "") {
+function anDeltaFromChange(change, key = analyticsState.metric, context = "", abs = "") {
     const ctx = context ? ` <span class="delta-ctx">${context}</span>` : "";
     if (!change) return `<span class="delta flat">—</span>${ctx}`;
     const arrow = change.flat ? "●" : change.value > 0 ? "▲" : "▼";
-    return `<span class="delta ${anChangeTone(change, key)}">${arrow} ${anChangeText(change)}</span>${ctx}`;
+    return `<span class="delta ${anChangeTone(change, key)}">${arrow} ${anChangeText(change)}</span>${abs}${ctx}`;
 }
 
+// Actual difference as text, e.g. "+₹15.26 L". Empty for % metrics, whose change is already in pp.
+function anDiffText(cur, base, key = analyticsState.metric) {
+    if (!anChange(cur, base, key) || ANALYTICS_METRICS[key].pct) return "";
+    const diff = cur - base;
+    return `${diff >= 0 ? "+" : "−"}${anFmt(Math.abs(diff), key)}`;
+}
+
+// The same difference as a coloured "(+₹X)" span, placed right after the % change.
+function anDiffSpan(cur, base, key = analyticsState.metric) {
+    const text = anDiffText(cur, base, key);
+    return text ? ` <span class="delta ${anChangeTone(anChange(cur, base, key), key)}">(${text})</span>` : "";
+}
+
+// Summary comparison line: % change, the actual difference, and the value it is compared with.
 function anDeltaLine(cur, base, key, context) {
-    return `<div class="delta-line">${anDeltaFromChange(anChange(cur, base, key), key, context)}</div>`;
+    const change = anChange(cur, base, key);
+    const abs = anDiffSpan(cur, base, key);
+    const baseText = base !== null && base !== undefined && Number.isFinite(base) ? ` · ${anFmt(base, key)}` : "";
+    return `<div class="delta-line">${anDeltaFromChange(change, key, context ? context + baseText : "", abs)}</div>`;
 }
 
 function anSpark(values) {
@@ -4354,6 +4177,10 @@ function anBuildModel() {
     return { asOf, ay, am, ad, cutoffDay, compareDay, months, byDate, first, last, current: months[months.length - 1] };
 }
 
+// Month-end projection = actual month-to-date + a forecast for each remaining day of the month.
+// Each remaining day is forecast with the learned calendar model (weekday, date of month, month of year,
+// bank holidays and the day after them, trend), using only data up to the as-of day.
+// Falls back to the "share of month usually done by this day" method when there is too little history.
 function anProjection(model, key = analyticsState.metric) {
     const def = ANALYTICS_METRICS[key];
     const cur = model.current;
@@ -4365,9 +4192,47 @@ function anProjection(model, key = analyticsState.metric) {
         .slice(-6)
         .map(x => { const full = anVal(x.full, key), part = anVal(x.mtd, key); return full > 0 && part !== null ? part / full : null; })
         .filter(v => v > 0);
-    if (!shares.length) return null;
-    const share = predictionMedian(shares);
-    return { value: curMtd / share, low: curMtd / Math.max(...shares), high: curMtd / Math.min(...shares), n: shares.length, share };
+    const shareProj = shares.length ? { value: curMtd / predictionMedian(shares), low: curMtd / Math.max(...shares), high: curMtd / Math.min(...shares) } : null;
+
+    const cutIso = anIso(cur.y, cur.m, Math.max(1, cur.cut));
+    const history = cur.cut > 0 ? anHistoryUpTo(cutIso) : anHistoryUpTo(anShift(anIso(cur.y, cur.m, 1), -1));
+    const best = latestPredictionContext && latestPredictionContext.best;
+    let remaining = 0, days = 0;
+    // Needs ~6 weeks of history to learn weekday and date-of-month effects before projecting day by day.
+    if (history.length >= 45) {
+        for (let d = cur.cut + 1; d <= cur.dim; d++) {
+            const forecast = seasonalMetric(history, predictionDate(anIso(cur.y, cur.m, d)), key, best ? best.windowDays : 28, best ? best.trendMode : "momentum");
+            if (!forecast || !Number.isFinite(forecast.value)) { days = 0; break; }
+            remaining += Math.max(0, forecast.value);
+            days++;
+        }
+    }
+    if (!days) {
+        if (!shareProj) return null;
+        return { ...shareProj, n: shares.length, share: curMtd / shareProj.value, method: "share" };
+    }
+    // Daily errors partly cancel over many days; the range scales the daily P80 error down by √days (but keeps a floor).
+    const dailyError = latestPredictionContext ? latestPredictionContext.intervalError : 0.15;
+    const spread = remaining * Math.max(dailyError / Math.sqrt(days), 0.03);
+    const value = curMtd + remaining;
+    return {
+        value,
+        low: Math.max(curMtd, value - spread),
+        high: value + spread,
+        n: Math.max(1, shares.length),
+        share: value ? curMtd / value : 1,
+        remaining, remainingDays: days, method: "model"
+    };
+}
+
+// Prediction rows (with dateObj) up to and including an ISO date; cached per data load.
+let anHistoryCache = { key: "", rows: [] };
+function anHistoryUpTo(iso) {
+    const last = currentRows[currentRows.length - 1];
+    const key = currentRows.length + "|" + (last ? last.date : "");
+    if (anHistoryCache.key !== key) anHistoryCache = { key, rows: getPredictionRows(), byIso: new Map() };
+    if (!anHistoryCache.byIso.has(iso)) anHistoryCache.byIso.set(iso, anHistoryCache.rows.filter(row => row.date <= iso));
+    return anHistoryCache.byIso.get(iso);
 }
 
 function anRanking(model) {
@@ -4431,8 +4296,8 @@ function anRenderKpis(model, proj, trend) {
 
     tiles.push(anTile({
         cls: "hero",
-        label: `${def.short} · month-to-date`,
-        tip: "Total from day 1 up to the as-of day of the current month, compared with exactly the same days of earlier months.",
+        label: `${def.short} · month-to-date (MTD)`,
+        tip: "MTD = month-to-date: the total from the 1st of this month up to the as-of day, compared with exactly the same days of earlier months, so a half-finished month is compared fairly.",
         value: anFmt(curMtd),
         sub: (cur.cut > 0 ? `${AN_MONTHS[cur.m - 1]} 1–${cur.cut}` : "No completed day yet") + (cur.cut > 0 && !cur.mtdCovered ? " · ⚠ missing days" : ""),
         foot: (prev ? anDeltaLine(curMtd, anVal(prev.mtd), key, `vs ${prev.short} 1–${prev.cut}`) : "") +
@@ -4456,9 +4321,13 @@ function anRenderKpis(model, proj, trend) {
         const prevFull = prev && prev.complete ? anVal(prev.full) : null;
         tiles.push(anTile({
             label: "Projected month-end",
-            tip: "Month-to-date divided by the share of the month that earlier complete months had reached by the same day (median of up to 6 months). Range uses the fastest and slowest of those months.",
+            tip: proj.method === "model"
+                ? "Actual month-to-date plus a forecast for every remaining day. Each day uses the learned weekday, date-of-month, month-of-year, bank-holiday (and day-after) and trend effects, from data up to the as-of day only."
+                : "Month-to-date divided by the share of the month that earlier complete months had reached by the same day (median of up to 6 months). Range uses the fastest and slowest of those months.",
             value: anFmt(proj.value),
-            sub: proj.n ? `Range ${anFmt(proj.low)} – ${anFmt(proj.high)} · ${Math.round(proj.share * 100)}% of a month is usually done by day ${cur.cut}` : "Month complete",
+            sub: !proj.n ? "Month complete" : proj.method === "model"
+                ? `Range ${anFmt(proj.low)} – ${anFmt(proj.high)} · ${anFmt(proj.remaining)} expected over the ${proj.remainingDays} remaining day${proj.remainingDays === 1 ? "" : "s"}`
+                : `Range ${anFmt(proj.low)} – ${anFmt(proj.high)} · ${Math.round(proj.share * 100)}% of a month is usually done by day ${cur.cut}`,
             foot: prevFull !== null ? anDeltaLine(proj.value, prevFull, key, `vs ${prev.label} actual`) : ""
         }));
     } else if (def.ratio) {
@@ -4513,78 +4382,95 @@ function anRenderKpis(model, proj, trend) {
     document.getElementById("anOpsKpis").innerHTML = ops.map(([k, label]) => anTile({
         cls: "compact",
         label: `${label} · MTD`,
+        tip: `MTD = month-to-date: ${AN_MONTHS[cur.m - 1]} 1–${cur.cut} this month, compared with the same days of last month.`,
         value: anFmt(anVal(cur.mtd, k), k),
+        sub: `${AN_MONTHS[cur.m - 1]} 1–${cur.cut}`,
         foot: prev ? anDeltaLine(anVal(cur.mtd, k), anVal(prev.mtd, k), k, `vs ${prev.short} same days`) : ""
     })).join("");
 }
 
+// Each insight is a scannable row: short title + detail on the left, value + change on the right.
+// Order: warnings, declines, gains, context; within each group the biggest move first.
 function anRenderInsights(model, proj, trend) {
     const key = analyticsState.metric, def = anMetric(), cur = model.current, prev = anPrevMonth(model);
     const name = def.short.toLowerCase();
     const items = [];
     const toneOf = change => ({ up: "up", down: "down", flat: "info" })[anChangeTone(change)];
+    const delta = (cur, base, k = key) => { const c = anChange(cur, base, k); return c ? anDeltaFromChange(c, k, "", anDiffSpan(cur, base, k)) : ""; };
+    const weightOf = change => change ? Math.abs(change.value) : 0;
+    const add = (tone, title, value, deltaHtml, detail, weight = 0, pin = false) => items.push({ tone, title, value, delta: deltaHtml, detail, weight, pin });
     const curMtd = anVal(cur.mtd);
+    const range = x => x.short + " 1–" + x.cut;
 
     if (model.asOf === localDateString() && !analyticsState.excludeAsOf) {
-        items.push({ tone: "warn", html: `As-of date is today, so day ${model.ad} may still be in progress. Tick <b>Exclude as-of day</b> for a fair like-for-like comparison.` });
+        add("warn", "Today is still in progress", "Day " + model.ad, "", "Today's numbers may be incomplete. Tick <b>Exclude as-of day</b> for a fair comparison.", 100);
     }
     if (cur.cut > 0 && !cur.mtdCovered) {
-        items.push({ tone: "warn", html: `${cur.cut - cur.mtd.days} day(s) have no data in ${cur.label} 1–${cur.cut}. Till-date numbers may be understated.` });
+        const gaps = cur.cut - cur.mtd.days;
+        add("warn", "Missing data this month", gaps + " day" + (gaps === 1 ? "" : "s"), "", range(cur) + " has gaps, so till-date numbers may be understated.", 90);
     }
     if (cur.cut > 0 && prev) {
-        const change = anChange(curMtd, anVal(prev.mtd));
-        items.push({ tone: toneOf(change), html: `<b>${cur.label} day 1–${cur.cut}</b> ${name} is <b>${anFmt(curMtd)}</b>, <b>${anChangeText(change)}</b> vs ${prev.label} over the same days (${anFmt(anVal(prev.mtd))}).` });
+        const base = anVal(prev.mtd), change = anChange(curMtd, base);
+        add(toneOf(change), "Month-to-date vs " + prev.short, anFmt(curMtd), delta(curMtd, base),
+            range(cur) + " vs " + range(prev) + " (" + anFmt(base) + ")", weightOf(change), true);
     }
     const ranked = anRanking(model);
     if (ranked.length > 1) {
         const rank = ranked.findIndex(r => r.x === cur) + 1;
         const top = ranked[0], low = ranked[ranked.length - 1];
-        if (rank === 1) items.push({ tone: def.lowerIsBetter ? "down" : "up", html: `Highest day 1–${cur.cut} ${name} across all <b>${ranked.length}</b> months on record. Lowest was ${low.x.label} (${anFmt(low.v)}).` });
-        else if (rank) items.push({ tone: "info", html: `Ranks <b>#${rank} of ${ranked.length}</b> for day 1–${cur.cut}. Highest was <b>${top.x.label}</b> (${anFmt(top.v)}); lowest ${low.x.label} (${anFmt(low.v)}).` });
+        if (rank === 1) add(def.lowerIsBetter ? "down" : "up", "Best month on record so far", "#1 of " + ranked.length, "",
+            "Highest day 1–" + cur.cut + " " + name + " of all months. Lowest: " + low.x.short + " (" + anFmt(low.v) + ").", 50);
+        else if (rank) add(rank === ranked.length ? (def.lowerIsBetter ? "up" : "down") : "info", rank === ranked.length ? "Lowest month on record so far" : "Rank among months", "#" + rank + " of " + ranked.length, delta(curMtd, top.v),
+            "Day 1–" + cur.cut + ". Highest: " + top.x.short + " (" + anFmt(top.v) + ") · lowest: " + low.x.short + " (" + anFmt(low.v) + ")");
     }
     const D = model.compareDay;
     const curDay = cur.daily[D];
     const sameVals = model.months.slice(0, -1).map(x => D <= x.dim ? anDayVal(x.daily[D]) : null).filter(v => v !== null);
     if (curDay && sameVals.length) {
-        const v = anDayVal(curDay), avg = predictionMean(sameVals);
-        const change = anChange(v, avg);
-        items.push({ tone: toneOf(change), html: `Day ${D} (${anWeekday(anIso(cur.y, cur.m, D))}) is <b>${anFmt(v)}</b>, ${anChangeText(change)} vs the average day ${D} of previous months (${anFmt(avg)}).${v >= Math.max(...sameVals) ? ` Highest day ${D} so far.` : ""}` });
+        const v = anDayVal(curDay), avg = predictionMean(sameVals), change = anChange(v, avg);
+        add(toneOf(change), "Day " + D + " vs a typical day " + D, anFmt(v), delta(v, avg),
+            anWeekday(anIso(cur.y, cur.m, D)) + " · average day " + D + " of earlier months " + anFmt(avg) + (v >= Math.max(...sameVals) ? " · <b>highest day " + D + " so far</b>" : ""), weightOf(change));
     }
     if (proj && proj.n) {
-        const prevFull = prev && prev.complete ? anVal(prev.full) : null;
-        const change = anChange(proj.value, prevFull);
-        items.push({ tone: prevFull !== null ? toneOf(change) : "info", html: `On pace for <b>${anFmt(proj.value)}</b> by month-end (range ${anFmt(proj.low)}–${anFmt(proj.high)})${prevFull !== null ? `, ${anChangeText(change)} vs ${prev.label} (${anFmt(prevFull)})` : ""}.` });
+        const prevFull = prev && prev.complete ? anVal(prev.full) : null, change = anChange(proj.value, prevFull);
+        add(prevFull !== null ? toneOf(change) : "info", "Month-end projection", anFmt(proj.value), prevFull !== null ? delta(proj.value, prevFull) : "",
+            "Likely " + anFmt(proj.low) + " – " + anFmt(proj.high) + (prevFull !== null ? " · " + prev.label + " finished at " + anFmt(prevFull) : ""), weightOf(change));
     }
     if (trend.direction) {
         const good = (trend.direction === "rising") !== !!def.lowerIsBetter;
-        items.push({
-            tone: trend.direction === "flat" ? "info" : good ? "up" : "down",
-            html: `Since <b>${trend.firstLabel}</b>, like-for-like ${name} is <b>${trend.direction}</b> by about ${trend.perMonth > 0 ? "+" : ""}${trend.perMonth.toFixed(1)}${trend.unit === "pp" ? " pp" : "%"} a month (${trend.strength} trend, R² ${trend.reg.r2.toFixed(2)})` +
-                `${trend.cmgr !== null ? `; compound growth ${(trend.cmgr * 100).toFixed(1)}% a month` : ""}.${trend.streak >= 2 ? ` ${trend.streak} months in a row ${trend.streakDir > 0 ? "up" : "down"}.` : ""}`
-        });
+        const per = (trend.perMonth > 0 ? "+" : "") + trend.perMonth.toFixed(1) + (trend.unit === "pp" ? " pp" : "%");
+        add(trend.direction === "flat" ? "info" : good ? "up" : "down", "Long-term trend: " + trend.direction, per + "<small> /month</small>", "",
+            "Since " + trend.firstLabel + " · " + trend.strength + " (R² " + trend.reg.r2.toFixed(2) + ")" +
+            (trend.cmgr !== null ? " · compound " + (trend.cmgr * 100).toFixed(1) + "%/month" : "") +
+            (trend.streak >= 2 ? " · " + trend.streak + " months in a row " + (trend.streakDir > 0 ? "up" : "down") : ""), Math.abs(trend.perMonth));
     }
     const endIso = anEndIso(model);
     const w7 = anPerDay(anWindowSums(model, endIso, 7)), p7 = anPerDay(anWindowSums(model, anShift(endIso, -7), 7));
     if (w7 !== null && p7 !== null) {
         const change = anChange(w7, p7);
-        items.push({ tone: toneOf(change), html: `Last 7 days ${def.ratio ? "" : "average "}<b>${anFmt(w7)}</b>${def.ratio ? "" : " a day"}, ${anChangeText(change)} vs the 7 days before.` });
+        add(toneOf(change), "Last 7 days vs the 7 before", anFmt(w7) + (def.ratio ? "" : "<small> /day</small>"), delta(w7, p7),
+            anShift(endIso, -6) + " → " + endIso + (def.ratio ? "" : " · daily average"), weightOf(change));
     }
     if (key !== "successRate") {
         const sr = anVal(cur.mtd, "successRate"), psr = prev ? anVal(prev.mtd, "successRate") : null;
         const change = anChange(sr, psr, "successRate");
-        if (sr !== null) items.push({ tone: change && change.value <= -0.5 ? "warn" : toneOf(change), html: `Success rate this month <b>${anFmt(sr, "successRate")}</b>${change ? ` (${anChangeText(change)} vs ${prev.short})` : ""}; failed amount ${anFmt(anVal(cur.mtd, "failedAmount"), "failedAmount")}.` });
+        if (sr !== null) add(change && change.value <= -0.5 ? "warn" : toneOf(change), "Success rate this month", anFmt(sr, "successRate"), delta(sr, psr, "successRate"),
+            (prev ? "vs " + prev.short + " same days · " : "") + "failed amount " + anFmt(anVal(cur.mtd, "failedAmount"), "failedAmount"), weightOf(change) * 10);
     }
     if (key !== "avgTicket") {
         const t = anVal(cur.mtd, "avgTicket"), pt = prev ? anVal(prev.mtd, "avgTicket") : null;
         const change = anChange(t, pt, "avgTicket");
-        if (t !== null) items.push({ tone: toneOf(change), html: `Average ticket <b>${anFmt(t, "avgTicket")}</b>${change ? ` (${anChangeText(change)} vs ${prev.short})` : ""}.` });
+        if (t !== null) add(toneOf(change), "Average ticket", anFmt(t, "avgTicket"), delta(t, pt, "avgTicket"),
+            "Per successful load, this month" + (prev ? " vs " + prev.short + " same days" : ""), weightOf(change));
     }
     const curDays = [];
     cur.daily.forEach((row, d) => { if (row) curDays.push({ iso: anIso(cur.y, cur.m, d), v: anDayVal(row) }); });
     const record = currentRows.filter(r => r.date <= model.asOf).map(r => ({ iso: r.date, v: anDayVal(r) })).filter(r => r.v !== null).sort((a, b) => b.v - a.v)[0];
     const bestCur = curDays.filter(r => r.v !== null).sort((a, b) => b.v - a.v)[0];
     if (bestCur && record) {
-        items.push({ tone: bestCur.iso === record.iso && !def.lowerIsBetter ? "up" : "info", html: `Best day this month: <b>${bestCur.iso} (${anWeekday(bestCur.iso)})</b> at ${anFmt(bestCur.v)}.${bestCur.iso === record.iso ? " <b>All-time high.</b>" : ` All-time high is ${record.iso} (${anFmt(record.v)}).`}` });
+        const isRecord = bestCur.iso === record.iso;
+        add(isRecord && !def.lowerIsBetter ? "up" : "info", isRecord ? "Best day ever, this month" : "Best day this month", anFmt(bestCur.v), "",
+            bestCur.iso + " (" + anWeekday(bestCur.iso) + ")" + (isRecord ? " · all-time high" : " · all-time high " + anFmt(record.v) + " on " + record.iso), isRecord ? 40 : 0);
     }
     if (!def.ratio) {
         const byWd = Array.from({ length: 7 }, () => []);
@@ -4594,11 +4480,42 @@ function anRenderInsights(model, proj, trend) {
             if (v !== null) byWd[predictionDate(iso).getDay()].push(v);
         }
         const avgs = byWd.map((vals, wd) => ({ wd, v: vals.length ? predictionMean(vals) : null })).filter(r => r.v !== null).sort((a, b) => b.v - a.v);
-        if (avgs.length >= 2) items.push({ tone: "info", html: `Over the last 8 weeks, <b>${AN_WEEKDAYS[avgs[0].wd]}</b> is the strongest weekday (avg ${anFmt(avgs[0].v)}) and <b>${AN_WEEKDAYS[avgs[avgs.length - 1].wd]}</b> the weakest (${anFmt(avgs[avgs.length - 1].v)}).` });
+        if (avgs.length >= 2) {
+            const best = avgs[0], worst = avgs[avgs.length - 1];
+            add("info", "Strongest and weakest weekday", AN_WEEKDAYS[best.wd] + " / " + AN_WEEKDAYS[worst.wd], "",
+                "Last 8 weeks · " + AN_WEEKDAYS[best.wd] + " avg " + anFmt(best.v) + " · " + AN_WEEKDAYS[worst.wd] + " avg " + anFmt(worst.v));
+        }
     }
+
     const icons = { up: "▲", down: "▼", warn: "!", info: "i" };
-    document.getElementById("anInsights").innerHTML = items.map(item => `<li class="ins-${item.tone}"><span class="ins-icon">${icons[item.tone]}</span><span>${item.html}</span></li>`).join("");
+    const priority = { warn: 0, down: 1, up: 2, info: 3 };
+    // Warnings first, then the pinned month-to-date headline, then declines, gains and context.
+    const rankOf = item => item.tone === "warn" ? 0 : item.pin ? 0.5 : priority[item.tone];
+    items.sort((a, b) => rankOf(a) - rankOf(b) || b.weight - a.weight);
+    document.getElementById("anInsights").innerHTML = items.map(item =>
+        '<li class="ins ins-' + item.tone + '"><span class="ins-icon">' + icons[item.tone] + "</span>" +
+        '<div class="ins-main"><div class="ins-title">' + item.title + '</div><div class="ins-detail">' + item.detail + "</div></div>" +
+        '<div class="ins-side"><div class="ins-value">' + item.value + "</div>" + (item.delta ? '<div class="ins-delta">' + item.delta + "</div>" : "") + "</div></li>").join("");
+
+    const counts = { warn: 0, down: 0, up: 0, info: 0 };
+    items.forEach(item => counts[item.tone]++);
+    const chipText = { warn: "to check", down: "down", up: "up", info: "context" };
+    document.getElementById("anInsightSummary").innerHTML = ["warn", "down", "up", "info"].filter(t => counts[t])
+        .map(t => '<span class="ins-chip ins-' + t + '"><span class="ins-icon">' + icons[t] + "</span>" + counts[t] + " " + chipText[t] + "</span>").join("");
+    anInsightCount = items.length;
+    anApplyInsightLimit();
 }
+
+// Only the 5 most important insights show until "Show all" is pressed.
+let anInsightCount = 0;
+let anInsightsExpanded = false;
+function anApplyInsightLimit() {
+    const more = document.getElementById("anInsightsMore");
+    document.getElementById("anInsights").classList.toggle("collapsed", !anInsightsExpanded);
+    more.hidden = anInsightCount <= 5;
+    more.textContent = anInsightsExpanded ? "Show fewer" : `Show all ${anInsightCount} insights`;
+}
+
 
 function anRenderVerdict(model, trend) {
     const el = document.getElementById("anTrendVerdict");
@@ -4639,10 +4556,11 @@ function anRenderTable(model, proj) {
         const mtd = anVal(x.mtd);
         const sameIso = D <= x.dim ? anIso(x.y, x.m, D) : null;
         const full = anVal(x.full);
-        const vsPrev = prev ? anChange(mtd, anVal(prev.mtd)) : null;
+        const prevMtd = prev ? anVal(prev.mtd) : null;
+        const vsPrev = prev ? anChange(mtd, prevMtd) : null;
         const vsCur = x.isCurrent ? null : anChange(curMtd, mtd);
         return {
-            x, gi, mtd, sameIso, full, vsPrevC: vsPrev, vsCurC: vsCur,
+            x, gi, mtd, prevMtd, sameIso, full, vsPrevC: vsPrev, vsCurC: vsCur,
             same: sameIso ? anDayVal(x.daily[D]) : null,
             vsPrev: vsPrev ? vsPrev.value : null,
             vsCur: vsCur ? vsCur.value : null,
@@ -4685,8 +4603,8 @@ function anRenderTable(model, proj) {
             `<td><span class="month-name">${x.label}</span>${x.isCurrent ? `<span class="badge">Current</span>` : ""}${r.rank === 1 ? `<span class="badge best">Highest</span>` : ""}</td>` +
             `<td>${x.mtd.days}/${x.cut}${x.mtdCovered || !x.cut ? "" : ` <span class="badge warn" title="Some days have no data">gaps</span>`}</td>` +
             `<td><div class="bar-cell"><span>${anFmt(r.mtd)}</span><span class="bar-track"><span class="bar-fill" style="width:${barWidth(r.mtd).toFixed(1)}%"></span></span></div></td>` +
-            `<td>${anDeltaFromChange(r.vsPrevC)}</td>` +
-            `<td>${x.isCurrent ? `<span class="muted">—</span>` : anDeltaFromChange(r.vsCurC)}</td>` +
+            `<td>${anDeltaFromChange(r.vsPrevC, undefined, "", anDiffSpan(r.mtd, r.prevMtd))}</td>` +
+            `<td>${x.isCurrent ? `<span class="muted">—</span>` : anDeltaFromChange(r.vsCurC, undefined, "", anDiffSpan(curMtd, r.mtd))}</td>` +
             `<td>${anFmt(r.same)} <span class="muted">${r.sameIso ? anWeekday(r.sameIso) : "n/a"}</span></td>` +
             `<td>${anFmt(r.full)}${x.isCurrent ? ` <span class="muted">so far</span>${proj && proj.n ? `<div class="muted small">proj. ${anFmt(proj.value)}</div>` : ""}` : x.complete ? "" : ` <span class="muted">partial</span>`}</td>` +
             `<td>${r.share !== null ? (r.share * 100).toFixed(1) + "%" : `<span class="muted">—</span>`}</td>` +
@@ -4698,7 +4616,7 @@ function anRenderTable(model, proj) {
     const avgOf = (rows, field) => { const vals = rows.map(r => r[field]).filter(v => v !== null && v !== undefined); return vals.length ? predictionMean(vals) : null; };
     const priorFull = prior.filter(r => r.x.complete);
     const foot = `<tfoot><tr><td>Avg of previous</td><td></td><td>${anFmt(avgOf(prior.filter(r => r.x.mtdCovered), "mtd"))}</td><td></td>` +
-        `<td>${anDeltaFromChange(anChange(curMtd, avgOf(prior.filter(r => r.x.mtdCovered), "mtd")))}</td><td>${anFmt(avgOf(prior, "same"))}</td>` +
+        `<td>${anDeltaFromChange(anChange(curMtd, avgOf(prior.filter(r => r.x.mtdCovered), "mtd")), undefined, "", anDiffSpan(curMtd, avgOf(prior.filter(r => r.x.mtdCovered), "mtd")))}</td><td>${anFmt(avgOf(prior, "same"))}</td>` +
         `<td>${anFmt(avgOf(priorFull, "full"))}</td><td>${avgOf(priorFull, "share") !== null ? (avgOf(priorFull, "share") * 100).toFixed(1) + "%" : "—"}</td>` +
         `<td>${anFmt(avgOf(prior, "rate"), "successRate")}</td><td>${anFmt(avgOf(prior, "ticket"), "avgTicket")}</td><td></td></tr></tfoot>`;
     document.getElementById("anMtdTable").innerHTML = head + `<tbody>${body}</tbody>` + foot;
@@ -4832,8 +4750,9 @@ function anRenderMtdChart(model, proj, p) {
             const i = items[0].dataIndex, x = vis[i], gi = model.months.indexOf(x);
             const lines = [];
             if (!def.ratio) lines.push(x.isCurrent ? (proj && proj.n ? `Projected month: ${anFmt(proj.value, key, true)}` : "") : `Full month: ${anFmt(anVal(x.full), key, true)}`);
-            if (gi > 0) lines.push(`vs previous month: ${anChangeText(anChange(mtd[i], anVal(model.months[gi - 1].mtd)))}`);
-            if (!x.isCurrent) lines.push(`Current vs this: ${anChangeText(anChange(anVal(model.current.mtd), mtd[i]))}`);
+            const withDiff = (cur, base) => { const d = anDiffText(cur, base, key); return anChangeText(anChange(cur, base, key)) + (d ? ` (${d})` : ""); };
+            if (gi > 0) lines.push(`vs previous month: ${withDiff(mtd[i], anVal(model.months[gi - 1].mtd))}`);
+            if (!x.isCurrent) lines.push(`Current vs this: ${withDiff(anVal(model.current.mtd), mtd[i])}`);
             return lines.filter(Boolean);
         }
     };
@@ -4892,11 +4811,18 @@ function anRenderPaceChart(model, p) {
     const options = anOptions(p);
     options.plugins.legend.position = "bottom";
     options.plugins.anMarker = { index: model.cutoffDay - 1, color: p.accent, label: `Day ${model.cutoffDay}` };
-    options.plugins.tooltip.itemSort = (a, b) => (b.raw ?? -Infinity) - (a.raw ?? -Infinity);
+    // Overlay order is fixed: average first, then months newest to oldest. #n = rank by value on that day.
+    const isMonth = i => i < vis.length;
+    options.plugins.tooltip.itemSort = (a, b) => (isMonth(a.datasetIndex) ? 1 : 0) - (isMonth(b.datasetIndex) ? 1 : 0) || b.datasetIndex - a.datasetIndex;
     options.plugins.tooltip.filter = item => item.raw !== null;
     options.plugins.tooltip.callbacks = {
         title: items => `Cumulative to day ${items[0].label}`,
-        label: ctx => `${ctx.dataset.label}: ${anFmt(ctx.raw, key, true)}`
+        label: ctx => {
+            if (!isMonth(ctx.datasetIndex)) return `${ctx.dataset.label}: ${anFmt(ctx.raw, key, true)}`;
+            const dayValues = datasets.slice(0, vis.length).map(ds => ds.data[ctx.dataIndex]).filter(v => v !== null && v !== undefined);
+            const rank = dayValues.filter(v => v > ctx.raw).length + 1;
+            return `#${rank} · ${ctx.dataset.label}: ${anFmt(ctx.raw, key, true)}`;
+        }
     };
     options.scales.x.title = { display: true, text: "Day of month", color: p.text };
     anChart("anPaceChart", { type: "line", data: { labels: Array.from({ length: 31 }, (_, i) => i + 1), datasets }, options, plugins: [anMarkerPlugin] });
@@ -4915,11 +4841,56 @@ function anRenderMonthlyChart(model, proj, p) {
         datasets.push({ type: "line", label: "Linear trend (complete months)", data: vis.map(x => { const gi = model.months.indexOf(x); return reg.intercept + reg.slope * gi; }), borderColor: p.neutral, borderDash: [6, 5], borderWidth: 1.6, pointRadius: 0, stack: "trend", order: 1 });
     }
     const options = anOptions(p, { stacked: !def.ratio });
-    options.plugins.tooltip.callbacks = {
-        title: items => { const x = vis[items[0].dataIndex]; return `${x.label}${x.isCurrent ? " · so far" : x.complete ? "" : ` · partial (${x.full.days}/${x.dim} days)`}`; },
-        label: ctx => `${ctx.dataset.label}: ${anFmt(ctx.raw, key, true)}`
+    const curIdx = vis.findIndex(x => x.isCurrent);
+    const hasProj = !def.ratio && proj && proj.n && curIdx >= 0 && actual[curIdx] !== null;
+    const donePct = hasProj ? Math.min(100, actual[curIdx] / proj.value * 100) : null;
+
+    // Overlay: for the current month show projected total, what is left, and a completion bar.
+    options.plugins.tooltip.enabled = false;
+    options.plugins.tooltip.external = ({ chart, tooltip }) => {
+        if (!tooltip.opacity || !tooltip.dataPoints || !tooltip.dataPoints.length) { anTipHide(); return; }
+        const i = tooltip.dataPoints[0].dataIndex, x = vis[i];
+        const row = (label, value) => `<div class="tip-row"><span>${label}</span><b>${value}</b></div>`;
+        let html = `<b>${x.label}</b>${x.isCurrent ? " · so far" : x.complete ? "" : ` · partial (${x.full.days}/${x.dim} days)`}`;
+        html += row(x.isCurrent ? "Actual so far" : "Actual", anFmt(actual[i], key, true));
+        if (x.isCurrent && hasProj) {
+            const daysLeft = x.dim - x.cut;
+            html += row("Projected total", anFmt(proj.value, key, true)) +
+                row("Projected rest", `${anFmt(Math.max(0, proj.value - actual[i]), key, true)} left`) +
+                `<div class="tip-bar"><span style="width:${donePct.toFixed(1)}%"></span></div>` +
+                `<div class="tip-row"><span>${donePct.toFixed(1)}% completed</span><span>${daysLeft} day${daysLeft === 1 ? "" : "s"} left</span></div>` +
+                `<div class="tip-hint">Projected range ${anFmt(proj.low, key)} – ${anFmt(proj.high, key)}</div>`;
+        }
+        if (reg && reg.n >= 3) html += row("Trend line", anFmt(reg.intercept + reg.slope * model.months.indexOf(x), key, true));
+        const rect = chart.canvas.getBoundingClientRect();
+        anTipShow({ clientX: rect.left + tooltip.caretX, clientY: rect.top + tooltip.caretY }, html);
     };
-    anChart("anMonthlyChart", { type: "bar", data: { labels: vis.map(x => x.short), datasets }, options });
+
+    // "% done" label above the current month's bar.
+    const doneLabel = {
+        id: "anDoneLabel",
+        afterDatasetsDraw(c) {
+            if (!hasProj) return;
+            const bar = c.getDatasetMeta(1).data[curIdx];
+            if (!bar) return;
+            const ctx = c.ctx;
+            ctx.save();
+            ctx.fillStyle = p.accent;
+            ctx.font = "700 11px Inter, Segoe UI, sans-serif";
+            const text = `${Math.round(donePct)}% done`;
+            // Keep the label inside the chart when the current month is the last bar.
+            const x = Math.min(bar.x, c.chartArea.right - ctx.measureText(text).width / 2);
+            ctx.textAlign = "center";
+            ctx.lineWidth = 4;
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = anCss("--surface-solid", "#ffffff");
+            ctx.strokeText(text, x, bar.y - 6);
+            ctx.fillText(text, x, bar.y - 6);
+            ctx.restore();
+        }
+    };
+    options.layout = { padding: { top: 16 } };
+    anChart("anMonthlyChart", { type: "bar", data: { labels: vis.map(x => x.short), datasets }, options, plugins: [doneLabel] });
 }
 
 function anRenderGrowthChart(model, p) {
@@ -4962,7 +4933,8 @@ function anRenderGrowthChart(model, p) {
 function anRenderDailyChart(model, p) {
     const key = analyticsState.metric, range = analyticsState.dailyRange;
     const endIso = anEndIso(model);
-    let start = range ? anShift(endIso, -(range - 1)) : model.first;
+    // range: -1 = this month (from the 1st of the as-of month), 0 = all, otherwise last N days.
+    let start = range === -1 ? endIso.slice(0, 8) + "01" : range ? anShift(endIso, -(range - 1)) : model.first;
     if (start < model.first) start = model.first;
     const dates = [];
     for (let iso = start; iso <= endIso; iso = anShift(iso, 1)) dates.push(iso);
@@ -4979,14 +4951,20 @@ function anRenderDailyChart(model, p) {
     const options = anOptions(p);
     options.scales.x.ticks.maxTicksLimit = window.innerWidth < 640 ? 5 : 12;
     options.scales.x.ticks.callback = function (value) {
-        const iso = this.getLabelForValue(value);
-        return `${Number(iso.slice(8))} ${AN_MONTHS[Number(iso.slice(5, 7)) - 1]}`;
+        return anDayLabel(this.getLabelForValue(value), anSpansYears(dates));
     };
+    const shortDate = iso => anDayLabel(iso, anSpansYears(dates));
+    const windowDays = { 1: 7, 2: 30 };
     options.plugins.tooltip.callbacks = {
         title: items => `${items[0].label} · ${anWeekday(items[0].label)}`,
-        label: ctx => `${ctx.dataset.label}: ${anFmt(ctx.raw, key, true)}`
+        label: ctx => {
+            const n = windowDays[ctx.datasetIndex];
+            const iso = dates[ctx.dataIndex];
+            const span = n ? ` (${shortDate(anShift(iso, -(n - 1)))} – ${shortDate(iso)})` : "";
+            return `${ctx.dataset.label}${span}: ${anFmt(ctx.raw, key, true)}`;
+        }
     };
-    anChart("anDailyChart", { type: "line", data: { labels: dates, datasets }, options });
+    anChart("anDailyChart",{ type: "line", data: { labels: dates, datasets }, options });
 
     const vals = daily.filter(v => v !== null);
     const mean = vals.length ? predictionMean(vals) : null;
@@ -5272,8 +5250,61 @@ function anInitControls() {
         if (e.key === "ArrowRight") { e.preventDefault(); anStepAsOf(1); }
     });
 
+    document.getElementById("anInsightsMore").addEventListener("click", () => {
+        anInsightsExpanded = !anInsightsExpanded;
+        anApplyInsightLimit();
+    });
+
+    // Forecast shows only the key numbers; accuracy, reasoning and weekday history open on demand. Choice is remembered.
+    const FORECAST_MORE_KEY = "transaction-dashboard-forecast-details";
+    const forecastToggle = document.getElementById("forecastMoreToggle");
+    const setForecastMore = open => {
+        document.getElementById("forecastMore").hidden = !open;
+        document.getElementById("forecastHistory").hidden = !open;
+        forecastToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        forecastToggle.textContent = open ? "Hide details" : "Show details: accuracy, reasoning & weekday history";
+        if (open && weekdayHistoryChart) weekdayHistoryChart.resize();
+    };
+    let forecastMoreOpen = false;
+    try { forecastMoreOpen = localStorage.getItem(FORECAST_MORE_KEY) === "1"; } catch (_) {}
+    setForecastMore(forecastMoreOpen);
+    forecastToggle.addEventListener("click", () => {
+        forecastMoreOpen = !forecastMoreOpen;
+        setForecastMore(forecastMoreOpen);
+        try { localStorage.setItem(FORECAST_MORE_KEY, forecastMoreOpen ? "1" : "0"); } catch (_) {}
+    });
+
     const nav = document.querySelector(".section-nav");
     const links = Array.from(nav.querySelectorAll("a"));
+
+    // Every detail section can be hidden; developer drill-downs start hidden. Choice is remembered.
+    const SECTIONS_KEY = "transaction-dashboard-collapsed-sections";
+    let collapsed;
+    try { collapsed = new Set(JSON.parse(localStorage.getItem(SECTIONS_KEY) || "null") || ["sec-explorer", "sec-health"]); } catch (_) { collapsed = new Set(["sec-explorer", "sec-health"]); }
+    const saveCollapsed = () => { try { localStorage.setItem(SECTIONS_KEY, JSON.stringify([...collapsed])); } catch (_) {} };
+    document.querySelectorAll(".dash-section.needs-data").forEach(section => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "secondary section-toggle";
+        const apply = hide => {
+            section.classList.toggle("collapsed", hide);
+            btn.textContent = hide ? "Show section" : "Hide section";
+            btn.setAttribute("aria-expanded", hide ? "false" : "true");
+        };
+        apply(collapsed.has(section.id));
+        btn.addEventListener("click", () => {
+            const hide = !section.classList.contains("collapsed");
+            apply(hide);
+            if (hide) collapsed.add(section.id); else collapsed.delete(section.id);
+            saveCollapsed();
+        });
+        section.querySelector(".section-head").appendChild(btn);
+    });
+    nav.addEventListener("click", e => {
+        const link = e.target.closest("a");
+        const section = link && document.querySelector(link.getAttribute("href"));
+        if (section && section.classList.contains("collapsed")) section.querySelector(".section-toggle").click();
+    });
     if ("IntersectionObserver" in window) {
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -5334,10 +5365,10 @@ anInitControls();
     }
 
     function refreshCharts() {
-        if (typeof chart !== "undefined") applyThemeToChart(chart);
-        if (typeof dayOfWeekChart !== "undefined") applyThemeToChart(dayOfWeekChart);
-        if (typeof transactionTypeChart !== "undefined") applyThemeToChart(transactionTypeChart);
-        if (typeof weekdayHistoryChart !== "undefined") applyThemeToChart(weekdayHistoryChart);
+        if (typeof chart !== "undefined" && chart) createTransactionChart();
+        if (typeof dayOfWeekChart !== "undefined" && dayOfWeekChart) generateDayOfWeekChart(getSelectedRows());
+        if (typeof transactionTypeChart !== "undefined" && transactionTypeChart) createTransactionTypeChart();
+        if (typeof updateWeekdayHistoryChart === "function") updateWeekdayHistoryChart();
         if (typeof renderAnalytics === "function" && typeof currentRows !== "undefined" && currentRows.length) renderAnalytics(true);
     }
 

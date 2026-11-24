@@ -2209,12 +2209,17 @@ const PREDICTION_CONFIG = {
     COUNT_TICKET_WEIGHT: 0.35,
     INTERVAL_QUANTILE: 0.80,
     STRONG_WEEKDAY_SAMPLE: 3,
-    MONTH_CYCLE_WEIGHT: 0.55,
+    MONTH_CYCLE_WEIGHT: 0.8,
     MONTH_CYCLE_MIN_FACTOR: 0.52,
-    MONTH_CYCLE_MAX_FACTOR: 1.48,
+    MONTH_CYCLE_MAX_FACTOR: 1.6,
     WEEKEND_WEIGHT: 0.78,
-    SATURDAY_FACTOR: 0.48,
-    SUNDAY_FACTOR: 0.38,
+    // Weekend dip shrinks on peak dates (Sun ~0.7x normally, ~0.87x on a 1st-4th / month-end peak).
+    // Dip kept = 1 - WEEKEND_PEAK_DAMPING * (month-cycle factor - 1), floored at WEEKEND_PEAK_MIN_DIP.
+    WEEKEND_PEAK_DAMPING: 1.5,
+    WEEKEND_PEAK_MIN_DIP: 0.4,
+    // Observed: Sat ~0.85x and Sun ~0.69x a weekday (after WEEKEND_WEIGHT).
+    SATURDAY_FACTOR: 0.81,
+    SUNDAY_FACTOR: 0.60,
     BANK_HOLIDAY_WEIGHT: 0.85,
     BANK_HOLIDAY_FACTOR: 0.30,
     MIN_CALENDAR_FACTOR: 0.22,
@@ -2241,13 +2246,13 @@ const PREDICTION_CONFIG = {
 };
 
 const SEASONAL_MONTH_BUCKETS = [
-    { label: "month-start (1st-3rd)", from: 1, to: 3 },
-    { label: "early-month (4th-6th)", from: 4, to: 6 },
-    { label: "first-third (7th-10th)", from: 7, to: 10 },
-    { label: "mid-month (11th-15th)", from: 11, to: 15 },
-    { label: "mid-month lull (16th-20th)", from: 16, to: 20 },
-    { label: "pre-month-end (21st-24th)", from: 21, to: 24 },
-    { label: "month-end (25th onwards)", from: 25, to: 31 }
+    { label: "month-start peak (1st-4th)", from: 1, to: 4 },
+    { label: "post-peak decay (5th-9th)", from: 5, to: 9 },
+    { label: "mid-month (10th-14th)", from: 10, to: 14 },
+    { label: "mid-month trough (15th-19th)", from: 15, to: 19 },
+    { label: "recovery (20th-24th)", from: 20, to: 24 },
+    { label: "pre-month-end (25th-28th)", from: 25, to: 31 },
+    { label: "month-end (last 3 days)", from: 32, to: 32 }
 ];
 
 let seasonalFactorCache = new Map();
@@ -2358,16 +2363,15 @@ function predictionMonthCycleRawFactor(targetDate) {
     const month = targetDate.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    if (day <= 3) return [1.48, 1.46, 1.42][day - 1];
-    if (day <= 6) return 1.34 - ((day - 4) / 2) * 0.20;
-    if (day <= 10) return 1.08 - ((day - 7) / 3) * 0.22;
-    if (day <= 15) return 0.78 - ((day - 11) / 4) * 0.20;
-    if (day <= 20) return 0.56 + ((day - 16) / 4) * 0.08;
-    if (day <= 24) return 0.68 + ((day - 21) / 3) * 0.18;
-
-    const remaining = Math.max(1, daysInMonth - 25);
-    const progress = Math.min(1, Math.max(0, (day - 25) / remaining));
-    return 1.00 + progress * 0.48;
+    // Observed load shape: 1st-4th peak, decay to the 15th-19th trough, rise into the last 3 days.
+    const fromEnd = daysInMonth - day;
+    if (fromEnd <= 2) return [1.55, 1.30, 1.10][fromEnd];
+    if (day <= 4) return 1.50;
+    if (day <= 9) return [1.40, 1.20, 1.10, 1.00, 0.95][day - 5];
+    if (day <= 14) return [0.95, 0.92, 0.89, 0.86, 0.83][day - 10];
+    if (day <= 19) return [0.62, 0.66, 0.69, 0.71, 0.72][day - 15];
+    if (day <= 24) return [0.82, 0.86, 0.89, 0.92, 0.96][day - 20];
+    return 0.92;
 }
 
 function predictionMonthCycleAdjustment(targetDate) {
@@ -2468,8 +2472,12 @@ function predictionMetric(history, targetDate, valueFn, windowDays, applyLoadSha
 // Learns weekday / month-phase / holiday factors from data (shrunk toward the configured priors),
 // removes them to estimate the underlying daily level, then re-applies them for the target date.
 
-function seasonalBucketIndex(dayOfMonth) {
-    return SEASONAL_MONTH_BUCKETS.findIndex(bucket => dayOfMonth >= bucket.from && dayOfMonth <= bucket.to);
+// Last 3 days of any month length share the month-end bucket (day 32 marker).
+function seasonalBucketIndex(dateObj) {
+    const dayOfMonth = dateObj.getDate();
+    const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
+    const key = daysInMonth - dayOfMonth <= 2 ? 32 : dayOfMonth;
+    return SEASONAL_MONTH_BUCKETS.findIndex(bucket => key >= bucket.from && key <= bucket.to);
 }
 
 function seasonalShrink(samples, prior, strength) {
@@ -2502,21 +2510,24 @@ function seasonalLearnFactors(history, metric) {
     const priorMean = (5 + satPrior + sunPrior) / 7;
     const weekdayPrior = [sunPrior, 1, 1, 1, 1, 1, satPrior].map(value => value / priorMean);
 
-    // Weekday: value vs centred 7-day mean.
+    // Weekday: value vs centred 7-day mean. Sat/Sun dips are learned on normal dates only (peak dates soften them).
+    const info = rows.map(row => seasonalDateInfo(row.date, row.dateObj));
     const weekdayRatios = Array.from({ length: 7 }, () => []);
     rows.forEach((row, i) => {
         if (isHoliday[i] || values[i] <= 0) return;
+        if ((info[i].dow === 0 || info[i].dow === 6) && info[i].cycle > 1.05) return;
         const level = seasonalWindowMean(values, isHoliday, i, 3);
         if (level > 0) weekdayRatios[row.dateObj.getDay()].push(values[i] / level);
     });
-    const weekday = weekdayRatios.map((ratios, day) => ({
-        factor: seasonalShrink(ratios, weekdayPrior[day], cfg.WEEKDAY_PRIOR_STRENGTH),
-        samples: ratios.length
-    }));
+    // Mon-Fri ranking is unstable month to month, so they share one pooled factor; Sat and Sun are learned separately.
+    const workRatios = weekdayRatios.slice(1, 6).flat();
+    const workFactor = seasonalShrink(workRatios, weekdayPrior[1], cfg.WEEKDAY_PRIOR_STRENGTH);
+    const weekday = weekdayRatios.map((ratios, day) => day >= 1 && day <= 5
+        ? { factor: workFactor, samples: workRatios.length, pooled: true }
+        : { factor: seasonalShrink(ratios, weekdayPrior[day], cfg.WEEKDAY_PRIOR_STRENGTH), samples: ratios.length });
 
     // Month phase: weekday-adjusted value vs centred ~31-day mean, as a correction on the configured month-cycle prior.
-    const info = rows.map(row => seasonalDateInfo(row.date, row.dateObj));
-    const weekdayAdjusted = rows.map((row, i) => values[i] / weekday[info[i].dow].factor);
+    const weekdayAdjusted = rows.map((row, i) => values[i] / seasonalWeekdayFactor(weekday, info[i]));
     const monthRatios = SEASONAL_MONTH_BUCKETS.map(() => []);
     rows.forEach((row, i) => {
         if (isHoliday[i] || values[i] <= 0) return;
@@ -2603,7 +2614,7 @@ function seasonalDateInfo(isoDate, dateObj) {
     let info = seasonalDateInfoCache.get(isoDate);
     if (!info) {
         const date = dateObj || predictionDate(isoDate);
-        info = { dow: date.getDay(), month: date.getMonth(), bucket: seasonalBucketIndex(date.getDate()), cycle: predictionMonthCycleAdjustment(date), dayKey: seasonalDayKey(date) };
+        info = { dow: date.getDay(), month: date.getMonth(), bucket: seasonalBucketIndex(date), cycle: predictionMonthCycleAdjustment(date), dayKey: seasonalDayKey(date) };
         seasonalDateInfoCache.set(isoDate, info);
     }
     return info;
@@ -2641,9 +2652,19 @@ function seasonalYearFactors(metric, targetDate) {
     return factors;
 }
 
+// Weekday factor for a date: the Sat/Sun dip (vs a weekday) is softened on peak dates instead of multiplied in full.
+function seasonalWeekdayFactor(weekday, info) {
+    const w = weekday[info.dow].factor;
+    if (info.dow !== 0 && info.dow !== 6) return w;
+    const cfg = PREDICTION_CONFIG;
+    const work = weekday[1].factor;
+    const keep = predictionClamp(1 - cfg.WEEKEND_PEAK_DAMPING * (info.cycle - 1), cfg.WEEKEND_PEAK_MIN_DIP, 1);
+    return work * (1 - (1 - w / work) * keep);
+}
+
 function seasonalCalendarFactor(factors, dateObj, isoDate, yearFactors) {
     const info = seasonalDateInfo(isoDate, dateObj);
-    const w = factors.weekday[info.dow].factor;
+    const w = seasonalWeekdayFactor(factors.weekday, info);
     const dayInfo = factors.day.get(info.dayKey);
     const m = info.cycle * factors.month[info.bucket].factor * (dayInfo ? dayInfo.factor : 1);
     const holidayToday = bankHolidayDates.has(isoDate);
@@ -2889,13 +2910,16 @@ function buildPredictionReasons(info) {
 
     if (seasonal) {
         const weekdayInfo = seasonal.factors.weekday[targetDateObj.getDay()];
-        const bucketIndex = seasonalBucketIndex(targetDateObj.getDate());
+        const bucketIndex = seasonalBucketIndex(targetDateObj);
         const monthInfo = seasonal.factors.month[bucketIndex];
         const trendChange = seasonal.trend - 1;
 
         reasons.push(`After removing weekday, date-of-month, month-of-year and holiday effects, a normal day is currently worth about ${formatPredictionMoney(seasonal.level)}.`);
-        reasons.push(`${weekdayName}s usually do ${pct(seasonal.calendar.w)} of an average day` +
-            (weekdayInfo.samples ? ` (based on ${weekdayInfo.samples} past ${weekdayName}s).` : " (default pattern, not enough history yet)."));
+        const dayGroup = weekdayInfo.pooled ? "Weekdays (Mon-Fri, treated alike)" : `${weekdayName}s`;
+        const softened = Math.abs(seasonal.calendar.w - weekdayInfo.factor) > 0.005;
+        reasons.push(`${dayGroup} usually do ${pct(softened ? weekdayInfo.factor : seasonal.calendar.w)} of an average day` +
+            (softened ? `, softened to ${pct(seasonal.calendar.w)} because this is a peak date (weekend dips are smaller on peak days)` : "") +
+            (weekdayInfo.samples ? ` (based on ${weekdayInfo.samples} past ${weekdayInfo.pooled ? "weekdays" : weekdayName + "s"}).` : " (default pattern, not enough history yet)."));
         reasons.push(`Day ${targetDateObj.getDate()} falls in the ${SEASONAL_MONTH_BUCKETS[bucketIndex].label} phase, which typically runs at ${pct(seasonal.calendar.m)} of normal` +
             (monthInfo.samples ? ` (tuned with ${monthInfo.samples} past days).` : " (default pattern, not enough history to tune it yet)."));
         const monthName = targetDateObj.toLocaleDateString("en-IN", { month: "long" });
@@ -4199,9 +4223,10 @@ function anProjection(model, key = analyticsState.metric) {
     const best = latestPredictionContext && latestPredictionContext.best;
     let remaining = 0, days = 0;
     // Needs ~6 weeks of history to learn weekday and date-of-month effects before projecting day by day.
+    // Multi-week horizon: always use the learned trend line (short-term momentum drifts over weeks).
     if (history.length >= 45) {
         for (let d = cur.cut + 1; d <= cur.dim; d++) {
-            const forecast = seasonalMetric(history, predictionDate(anIso(cur.y, cur.m, d)), key, best ? best.windowDays : 28, best ? best.trendMode : "momentum");
+            const forecast = seasonalMetric(history, predictionDate(anIso(cur.y, cur.m, d)), key, best ? best.windowDays : 28, "learned");
             if (!forecast || !Number.isFinite(forecast.value)) { days = 0; break; }
             remaining += Math.max(0, forecast.value);
             days++;
